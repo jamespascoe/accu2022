@@ -1,0 +1,1306 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>C++20 + Lua = Flexibility</title>
+
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico?">
+
+    <link rel="stylesheet" href="dist/reset.css">
+    <link rel="stylesheet" href="dist/reveal.css">
+    <link rel="stylesheet" href="dist/theme/league.css" id="theme">
+
+    <!-- Theme used for syntax highlighted code -->
+    <link rel="stylesheet" href="plugin/highlight/github.css" id="highlight-theme">
+
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section id="Title-Slide"
+                 data-state="hideControls"
+                 data-menu-title="Title Slide"
+                 data-background-image="media/Title-Slide.jpg"
+                 data-background-size="contain">
+        </section>
+        <section>
+          <h1>C++20 + Lua = Flexibility</h1>
+          <p>
+            <small>
+              Jim (James) Pascoe<br>
+              <a href="http://www.james-pascoe.com">http://www.james-pascoe.com</a><br>
+              <a href="mailto:james@james-pascoe.com">james@james-pascoe.com</a><p>
+
+              <a href="http://jamespascoe.github.io/accu2021">http://jamespascoe.github.io/accu2021</a><br>
+              <a href="https://github.com/bluwireless/LuaChat.git">https://github.com/jamespascoe/LuaChat.git</a>
+            </small>
+        </section>
+        <section>
+          <h2>Overview</h2>
+          <span class="fragment" style="color:yellow">A Tutorial on Combining C++20 and Lua 5.4.2</span><br>
+          <span class="fragment" style="color:yellow">Up-to-date practical advice with code</span>
+          <p>
+          <ul>
+            <span class="fragment"><li>Why Combine C++ and Lua?</li></span>
+            <span class="fragment">
+              <ul>
+                <li>Example: <a href="https://www.bluwireless.com/applications/rail/">High Speed Transport</a></li>
+              </ul>
+            </span>
+            <span class="fragment"><li>How to Combine C++ and Lua</li></span>
+            <span class="fragment">
+              <ul>
+                <li><a href="https://github.com/ThePhD/sol2">Sol3</a> and <a href="http://swig.org/">Swig 4.0.2</a></li>
+              </ul>
+            </span>
+            <span class="fragment"><li>Benchmarking and Concurrency</li></span>
+            <span class="fragment"><ul><li>Coroutines and performance</li></ul></span>
+          </ul>
+        </section>
+        <section>
+          <h2>Why Combine C++ and Lua?</h2>
+          <span class="fragment" style="color:yellow">Flexibility </span>
+          <span class="fragment" style="color:yellow">Post Release</span>
+          <p>
+          <ul>
+            <span class="fragment"><li>Behaviour can be modified after code is shipped</li></span>
+            <span class="fragment">
+              <ul>
+                <li>Cope with future unknowns <span class="fragment" style="color:yellow">proactively</span></li>
+              </ul>
+            </span>
+            <span class="fragment"><li>Modifications are fast</li></span>
+            <span class="fragment">
+              <ul>
+                <li>No compile, package, deploy cycle</li>
+              </ul>
+            </span>
+            <span class="fragment"><li>Barrier to entry is much lower for Lua</li></span>
+            <span class="fragment">
+              <ul>
+                <li>Appeals to FAEs, Architects, Customers</li>
+              </ul>
+          </ul>
+        </section>
+
+      <section>
+          <section data-background-video="media/BluWireless_HST_Background.mp4" data-background-video-loop=true>
+            <h1>High Speed Transport Example</h1>
+          </section>
+
+          <section>
+            <h2><a href="http://bluwireless.com/transport/rail">Blu Wireless</a></h2>
+            <ul>
+              <span class="fragment"><li>IP networking over 5G mmWave (60 GHz) modems</li></span>
+              <span class="fragment"><ul><li>802.11ad MAC + PHY (Hydra) + software</li></ul></span>
+              <span class="fragment"><li>High-bandwidth, low latency mobile Internet</li></span>
+              <span class="fragment"><ul><li>Up to 3.5Gbps wireless links (up to 1km)</ul></span>
+              <span class="fragment"><li>Embedded quad-core ARMv8 NPUs</li></span>
+              <span class="fragment"><ul><li>Track-side / train-top mmWave radios</li></ul</span>
+            </ul>
+          </section>
+
+          <section data-menu-title="Blu Wireless Devices">
+          <img class="stretch" data-src="media/devices.png" style="background:none; border:none; box-shadow:none;">
+          </section>
+
+          <section data-menu-title="Blu Wireless How It Works"
+                   data-background-video="media/BluWireless_How_It_Works.mp4"
+                   id="video">
+          </section>
+
+          <section>
+            <h2>Connection Management</h2>
+            <ul>
+              <span class="fragment fade-in">
+                <span class="fragment highlight-yellow"><li>Mission critical software component</li></span>
+              </span>
+              <span class="fragment fade-in">
+                <span class="fragment highlight-yellow"><li>Decides which radio to connect to and when</li></span>
+              </span>
+              <span class="fragment"><li>v1.0 fixed behaviour: connect to strongest signal</li></span>
+              <span class="fragment"><li>Anomalies led to poor performance</li></span>
+              <span class="fragment"><li>Software updates were costly</li></span>
+              <span class="fragment fade-in">
+                <span class="fragment highlight-yellow"><li>Improvements could not be made fast enough</li></span>
+              </span>
+            </ul>
+          </section>
+
+          <section>
+            <h2>Mobile Connection Manager</h2>
+            <ul>
+              <span class="fragment"><li>Complete redesign</li></span>
+              <span class="fragment"><li>Decoupled architecture (C++17 & Lua 5.4.2)</li></span>
+              <span class="fragment fade-in" style="color:yellow"><li>Actions (C++): 'Scan', 'Connect', 'Probe' etc.</li></span>
+              <span class="fragment fade-in" style="color:yellow"><li>Behaviours (Lua): implement 'beam choreography'</li></span>
+              <span class="fragment fade-in" style="color:yellow"><li>Changes can be made in the field by FAEs</li></span>
+              <span class="fragment"><li>Consolidated into supported releases</li></span>
+            </ul>
+          </section>
+
+          <section data-menu-title="MCM Architecture">
+            <img class="stretch" data-src="media/Mobile_Connection_Manager.png" style="background:none; border:none; box-shadow:none;">
+          </section>
+
+        </section>
+
+        <section>
+
+          <section data-menu-title="Modern C++ and Lua" data-background-video="media/BluWireless_HST_Background.mp4" data-background-video-loop=true>
+            <h1>Combining Modern C++ and Lua</h1>
+          </section>
+
+          <section>
+            <h2><a href="http://lua.org">Lua</a></h2>
+            <ul>
+              <span class="fragment"><li>Lightweight embeddable scripting language</li></span>
+              <span class="fragment"><li>Dynamically typed, runs by interpreting bytecode</li></span>
+              <span class="fragment"><li>Simple procedural syntax</li></span>
+              <span class="fragment"><li>Emphasis on meta-mechanisms</li></span>
+              <span class="fragment fade-in">
+                <span class="fragment highlight-yellow"><li>Instant appeal for Architects, FAEs etc.</li></span>
+              </span>
+            </ul>
+          </section>
+
+          <section>
+            <h2><a href="https://www.lua.org/manual/5.4/manual.html#4">The Lua C API</a></h2>
+            <ul>
+              <span class="fragment"><li>Lua communicates with C++ through a virtual stack</li></span>
+              <span class="fragment"><li>Strict stack discipline is not enforced</li></span>
+              <span class="fragment"><ul><li>indices &#8805 1 are positions from the bottom</li></ul></span>
+              <span class="fragment"><ul><li>negative indices are relative to the top</li></ul></span>
+              <span class="fragment"><li>Pseudo indices for the Lua Registry and Upvalues</li></span>
+              <span class="fragment"><li>Compile with LUA_USE_APICHECK to enable checks</li></span>
+            </ul>
+          </section>
+
+          <section>
+            <h2>Lua C API: Lua</h2>
+            <pre><code class="stretch lua" data-trim data-line-numbers="|1-2|4-15|11-12|">
+-- Create a global table 't'
+t = { x=1, y=2 }
+
+function f (str, val, int)
+  print(
+    string.format(
+      "Lua: f called with args: %s %d %d", str, val, int
+    )
+  )
+
+  -- Call a C++ function
+  local rc = cppFunc(str, t.y, int)
+
+  return rc
+end
+            </code></pre>
+          </section>
+
+          <section>
+            <h2><a href="http://www.lua.org/manual/5.4/manual.html#4">Lua C API: C++</a></h2>
+            <pre class="stretch"><code class="c++" style="width:100%" data-trim data-line-numbers="|4-11|15-26|28-35|">
+#include &ltiostream&gt
+#include "lua.hpp"
+
+int cppFunc(lua_State *L) {
+  std::cout << "cppFunc called with args:" << std::endl;
+
+  for (int n=1; n <= lua_gettop(L); ++n)
+    std::cout << lua_tostring(L, n) << std::endl;
+
+  return 0;
+}
+
+int main([[maybe_unused]] int argc, char ** argv)
+{
+  // Create a new lua state
+  lua_State *L = luaL_newstate();
+
+  // Open all libraries
+  luaL_openlibs(L);
+
+  // export a C++ function to Lua
+  lua_register(L, "cppFunc", cppFunc);
+
+  // Load and run the Lua file
+  luaL_loadfile(L, argv[1]);
+  lua_pcall(L, 0, 0, 0);
+
+  // Call 'f' with the arguments "how", t.x, 14
+  lua_getglobal(L, "f");     /* function to be called */
+  lua_pushliteral(L, "how"); /* 1st argument */
+  lua_getglobal(L, "t");     /* table to be indexed */
+  lua_getfield(L, -1, "x");  /* push t.x (2nd arg) */
+  lua_remove(L, -2);         /* remove 't' from the stack */
+  lua_pushinteger(L, 14);    /* 3rd argument */
+  lua_call(L, 3, 1);         /* call 'f' (3 args, 1 res) */
+
+  lua_close(L);
+}
+            </code></pre>
+          </section>
+
+          <section>
+            <h2>Lua C API: Build & Run</h2>
+              <pre style="width:100%"><code class="plaintext" data-trim data-noescape data-line-numbers="|1-3|4-8|">
+> brew install lua # sudo apt-get -y install lua5.4
+> clang++ -std=c++2a -llua -o lua-cpp lua-cpp.cpp
+> ./lua-cpp lua-cpp.lua
+Lua: f called with args: how 1 14
+cppFunc called with args:
+how
+2
+14
+              </code></pre>
+          </section>
+
+        </section>
+        <section>
+
+        <section data-menu-title="Sol3: Binding C++ and Lua" data-background-video="media/BluWireless_HST_Background.mp4" data-background-video-loop=true>
+          <h1>Sol3: Binding Modern C++ and Lua</h1>
+        </section>
+
+          <section>
+            <h2><a href="https://github.com/ThePhD/sol2">Sol3</a></h2>
+            <ul>
+              <span class="fragment"><li><a href="https://github.com/Rapptz/sol">Sol</a>: <a href="https://github.com/Rapptz">Danny Rapptz</a></li></span>
+              <span class="fragment"><ul><li>Last commit: 2015</li></ul></span>
+              <span class="fragment"><li><a href="https://github.com/ThePhD/sol2">Sol2/3 (Sol2 v3)</a>: <a href="https://github.com/ThePhD">JeanHeyd Meneide (ThePhD)</a></li></span>
+              <span class="fragment"><ul><li>Active since 2013, 100+ contributors</li></ul></span>
+              <span class="fragment"><li>Modern C++ Binding for Lua</li></span>
+              <span class="fragment"><ul><li>Header only, <a href="https://sol2.readthedocs.io/en/latest/benchmarks.html">fast</a></li></ul></span>
+              <span class="fragment"><ul><li><a href="https://github.com/ThePhD/sol2#features">Support for Modern C++ types</a></li></ul></span>
+              <span class="fragment"><ul><li>Nice upgrade path</li></ul></span>
+            </ul>
+          </section>
+
+          <section>
+            <h2><a href="https://sol2.readthedocs.io/en/latest/tutorial/all-the-things.html">Sol3: Stack Manipulation</a></h2>
+            <pre class="stretch"><code class="c++" style="width:100%" data-trim data-line-numbers="|15-30|6-13|">
+#include &ltiostream&gt
+
+#define SOL_ALL_SAFETIES_ON 1
+#include &ltsol/sol.hpp&gt
+
+int cppFunc(lua_State *L) {
+  std::cout << "cppFunc called with args:" << std::endl;
+
+  for (int n=1; n <= lua_gettop(L); ++n)
+    std::cout << lua_tostring(L, n) << std::endl;
+
+  return 0;
+}
+
+int main([[maybe_unused]] int argc, char ** argv)
+{
+  // Create a new lua state and open libraries
+  sol::state lua;
+  lua.open_libraries(sol::lib::base, sol::lib::string);
+
+  // Export a C++ function to Lua
+  lua["cppFunc"] = cppFunc;
+
+  // Load and run the Lua file
+  lua.script_file(argv[1]);
+
+  // Call 'f' with the arguments "how", t.x, 14
+  sol::function f = lua["f"];
+  f("how", lua["t"]["x"], 14);
+}
+            </code></pre>
+          </section>
+
+          <section data-menu-title="Sol3: Improved Example">
+            <h2><a href="https://sol2.readthedocs.io/en/latest/tutorial/all-the-things.html">Sol3: Improved Example</a></h2>
+            <pre class="stretch"><code class="c++" style="width:100%" data-trim data-line-numbers="|6-11|20|">
+#include &ltiostream&gt
+
+#define SOL_ALL_SAFETIES_ON 1
+#include &ltsol/sol.hpp&gt
+
+int cppFunc_oneline(std::string str, int a, int b) {
+  std::cout << "cppFunc_oneline called with args: " <<
+    str << " " << a << " " << b << std::endl;
+
+  return 0;
+}
+
+int main([[maybe_unused]] int argc, char ** argv[1]);
+{
+  // Create a new lua state and open libraries
+  sol::state lua;
+  lua.open_libraries(sol::lib::base, sol::lib::string);
+
+  // Export a C++ function to Lua
+  lua["cppFunc"] = cppFunc_oneline;
+
+  // Load and run the Lua file
+  lua.script_file(argv[1]);
+
+  // Call 'f' with the arguments "how", t.x, 14
+  sol::function f = lua["f"];
+  f("how", lua["t"]["x"], 14);
+}
+            </code></pre>
+          </section>
+
+          <section>
+            <h2>Sol3 Example: Build & Run</h2>
+              <pre style="width:101%"><code class="plaintext" data-trim data-noescape data-line-numbers="|1-3|4-9|">
+> brew install lua # sudo apt-get -y install lua5.4
+> git clone https://github.com/ThePhD/sol2.git
+> clang++ -std=c++2a -I sol2/include -llua -o lua-sol3 lua-sol3.cpp
+> ./lua-sol3 lua-cpp.lua
+Lua: f called with args: how 1 14
+cppFunc called with args:
+how
+2
+14
+              </code></pre>
+
+              <pre style="width:101%"><code class="plaintext" data-trim data-noescape data-line-numbers="|1-2|3-4|">
+> clang++ -std=c++2a -I sol2/include -llua -o lua-sol3 lua-sol3-ol.cpp
+> ./lua-sol3 lua-cpp.lua
+Lua: f called with args: how 1 14
+cppFunc_oneline called with args: how 2 14
+              </code></pre>
+          </section>
+
+          <section>
+            <h2>Sol3: Container Example</h2>
+            <pre class="stretch"><code class="c++" style="width:100%" data-trim data-line-numbers="|10|14-16|20-27|29-48|51-57|59-69|71-73|">
+              <script type="text/template">
+#include <iostream>
+#include <vector>
+#include <string>
+#include <chrono>
+#include <utility>
+
+#define SOL_ALL_SAFETIES_ON 1
+#include <sol/sol.hpp>
+
+#include "date.h"
+
+class timestamped_messages {
+
+  using ts_msg = std::pair<std::string, std::string>;
+  using ts_msg_vec = std::vector<ts_msg>;
+  ts_msg_vec ts_msgs;
+
+public:
+
+  using value_type = ts_msg_vec::value_type;
+  using iterator = ts_msg_vec::iterator;
+  using size_type = ts_msg_vec::size_type;
+
+  iterator begin() { return iterator(ts_msgs.begin()); }
+  iterator end() { return iterator(ts_msgs.end()); }
+  size_type size() const noexcept { return ts_msgs.size(); }
+  bool empty() const noexcept { return ts_msgs.empty(); }
+
+  void add_msg(std::string const& msg) {
+
+    using namespace std::chrono;
+
+    /* Add human-readable microsecond resolution timestamps
+     * to messages e.g. 07:05:57.413381 */
+    auto now = system_clock::now();
+    time_t now_t = system_clock::to_time_t(now);
+    tm *date = std::localtime(&now_t);
+    date->tm_hour = 0;
+    date->tm_min = 0;
+    date->tm_sec = 0;
+    auto midnight = system_clock::from_time_t(std::mktime(date));
+
+    std::ostringstream oss;
+    oss << date::hh_mm_ss(now-midnight);
+
+    ts_msgs.push_back({ oss.str(), msg });
+  }
+};
+
+int main() {
+  sol::state lua;
+  lua.open_libraries(sol::lib::base);
+
+  lua.new_usertype<timestamped_messages>(
+    "timestamped_messages",
+    "add_msg", &timestamped_messages::add_msg
+  );
+
+  lua.script(R"(
+    ts_msgs = timestamped_messages.new()
+    ts_msgs:add_msg("msg 1")
+    ts_msgs:add_msg("msg 2")
+    ts_msgs:add_msg("msg 3")
+
+    for _, ts, msg in pairs(ts_msgs)
+    do
+      print("Lua: " .. tostring(ts) .. " " .. tostring(msg))
+    end
+  )");
+
+  timestamped_messages& ts_msgs = lua["ts_msgs"];
+  for (auto [ts, msg] : ts_msgs)
+    std::cout << "C++: " << ts << " " << msg << std::endl;
+}
+              </script>
+            </code></pre>
+          </section>
+
+          <section data-menu-title="Sol3 Container: Build & Run">
+            <h2>Sol3 Container Example: Build & Run</h2>
+              <pre style="width:100%"><code class="plaintext" data-trim data-noescape data-line-numbers="|1-2|3|4|5-10|">
+> git clone https://github.com/HowardHinnant/date.git
+> git clone https://github.com/ThePhD/sol2.git
+> clang++ -std=c++2a -I sol2/include/ -I date/include/date -l lua -o container container.cpp
+> ./container
+Lua: 21:35:10.437971 msg 1
+Lua: 21:35:10.438393 msg 2
+Lua: 21:35:10.438403 msg 3
+C++: 21:35:10.437971 msg 1
+C++: 21:35:10.438393 msg 2
+C++: 21:35:10.438403 msg 3
+              </code></pre>
+          </section>
+
+          <section>
+            <h2>Next Steps</h2>
+            <ul>
+              <span class="fragment"><li>What other features does Sol3 support?</li></span>
+              <span class="fragment"><ul><li><a href="https://sol2.readthedocs.io/en/latest/api/state.html">state_view</a>: non-owning access to a <tt>lua_State*</tt></li></ul></span>
+              <span class="fragment"><ul><li>optionals, callables, user-types, concurrency</li></ul></span>
+              <span class="fragment"><ul><li>lots more - feature matrix available <a href"https://sol2.readthedocs.io/en/latest/features.html">here</a></li></ul></span>
+
+              <span class="fragment"><li><a href="https://sol2.readthedocs.io/en/latest/tutorial/customization.html">Customisation Traits</a></li></span>
+              <span class="fragment"><ul><li>Containers, reference-counted resources, UDTs</li></ul></span>
+              <span class="fragment"><li>Further examples</li></span>
+              <span class="fragment"><ul><li>Comprehensive selection in <a href="https://github.com/ThePhD/sol2/tree/develop/examples/source">examples</a> directory</li></ul></span>
+            </ul>
+          </section>
+
+        </section>
+        <section>
+
+        <section data-background-video="media/BluWireless_HST_Background.mp4" data-background-video-loop=true>
+          <h1>SWIG and LuaChat</h1>
+        </section>
+
+          <section>
+            <h2><a href="http://swig.org">SWIG</a></h2>
+            <ul>
+              <span class="fragment"><li>Simplified Wrapper and Interface Generator</li></span>
+              <span class="fragment"><li>Produces C++ bindings for many target languages</li></span>
+              <span class="fragment"><li>Generates Lua stack calls for std C++ types</li></span>
+              <span class="fragment"><ul><li>std::string, std::vector, std::map etc.</li></ul></span>
+              <span class="fragment"><li>C++20 types can be supported with typemaps</li></span>
+              <span class="fragment"><li>Integrates well with CMake</li></span>
+            </ul>
+          </section>
+
+          <section>
+            <h2><a href="http://www.github.com/jamespascoe/">LuaChat</a></h2>
+            <ul>
+              <span class="fragment"><li>Unix 'talk' program (written in C++17 & Lua 5.3/5.4)</li></span>
+              <span class="fragment"><li>Available on <a href="http://www.github.com/jamespascoe/">GitHub</a> (MIT license)</li></span>
+              <span class="fragment"><li><a href="http://think-async.com/Asio/asio-1.12.2/doc/">Asio</a> for asynchronous TCP and timers</li></span>
+              <span class="fragment"><li><a href="https://github.com/gabime/spdlog">spdlog</a> for logging,
+                        <a href="https://github.com/jarro2783/cxxopts">cxxopts</a> for command line processing and
+                        <a href="https://cmake.org/cmake/help/latest/">CMake</a> for build generation</li></span>
+            </ul>
+          </section>
+
+          <section data-menu-title="LuaChat Session">
+          <img width="70%" data-src="media/LuaChat-run-1.png" style="background:none; border:none; box-shadow:none;">
+          <img width="70%" data-src="media/LuaChat-run-2.png" style="background:none; border:none; box-shadow:none;">
+          </section>
+
+          <section data-menu-title="LuaChat Architecture">
+          <img class="stretch" data-src="media/LuaChat.png" style="background:none; border:none; box-shadow:none;">
+          </section>
+
+          <section>
+            <h2><a href="https://github.com/jamespascoe/LuaChat/">Build Instructions</a></h2>
+            <p>
+            Ubuntu 18.04 (Linux Mint 19):
+            <pre><code class="plaintext" data-trim data-noescape data-line-numbers="">
+git clone https://github.com/jamespascoe/LuaChat.git
+sudo apt-get -y install lua5.3 lua5.3-dev luarocks swig
+sudo luarocks install luaposix
+mkdir build; cd build; cmake ../LuaChat; make
+./src/lua_chat
+            </code></pre>
+            <p>
+            MacOS (Big Sur):
+            <pre><code class="plaintext" data-trim data-noescape data-line-numbers="">
+git clone https://github.com/jamespascoe/LuaChat.git
+brew install lua luarocks swig
+luarocks install luaposix
+mkdir build; cd build; cmake ../LuaChat; make
+./src/lua_chat
+            </code></pre>
+          </section>
+
+          <section>
+            <h2>LuaChat SWIG CMake</h2>
+            <pre><code class="CMake stretch" data-trim data-line-numbers="|2|8|">
+set(LUA_CHAT_SWIG_SRCS
+    lua_chat_actions.i lua_chat_action_log.cpp)
+
+set_source_files_properties(${LUA_CHAT_SWIG_SRCS}
+                            PROPERTIES CPLUSPLUS ON)
+
+swig_add_library(actions TYPE USE_BUILD_SHARED_LIBS
+                 LANGUAGE lua
+                 SOURCES ${LUA_CHAT_SWIG_SRCS})
+
+target_include_directories(actions PRIVATE
+                           ${CMAKE_CURRENT_SOURCE_DIR}
+                           ${LUA_CHAT_SOURCE_DIR}/src
+                           ${LUA_CHAT_SOURCE_DIR}/third_party
+                           ${LUA_INCLUDE_DIR})
+
+target_compile_definitions(actions PRIVATE ASIO_STANDALONE)
+
+target_link_libraries(actions PRIVATE std::filesystem)
+            </code></pre>
+          </section>
+
+          <section>
+            <h2>LuaChat SWIG Input</h2>
+            <pre><code class="" data-trim data-line-numbers="|1|3|5-11|13-14|16-25|27-32|">
+%module Actions
+
+%include &ltstd_string.i&gt
+
+// Definitions required by the SWIG wrapper to compile
+%{
+#include "lua_chat_log_manager.hpp"
+#include "lua_chat_action_log.hpp"
+#include "lua_chat_action_talk.hpp"
+#include "lua_chat_action_timer.hpp"
+%}
+
+// Files to be wrapped by SWIG
+%include "lua_chat_action_log.hpp"
+
+%define CTOR_ERROR
+{
+  try {
+    $function
+  }
+  catch (std::exception const& e) {
+    log_fatal(e.what());
+  }
+}
+%enddef
+
+// Include the actions and define exception handlers
+%exception Talk::Talk CTOR_ERROR;
+%include "lua_chat_action_talk.hpp"
+
+%exception Timer::Timer CTOR_ERROR;
+%include "lua_chat_action_timer.hpp"
+            </code></pre>
+          </section>
+
+          <section>
+            <h2><a href="http://www.swig.org/Doc4.0/SWIGDocumentation.html#Typemaps">Typemaps</a></h2>
+            <ul>
+              <span class="fragment"><li>Maps C++ types onto types in the target language</li></span>
+              <span class="fragment"><li>We can add support for Modern C++ abstractions</li></span>
+              <span class="fragment"><ul><li>E.g. callbacks: Lua functions &#8594 std::function</li></ul></span>
+              <span class="fragment" style="color:yellow"><li>Acknowledgement: thanks to Petar Terziev for the original version of the following example</li></span>
+            </ul>
+          </section>
+
+          <section>
+            <h2><a href="https://gist.github.com/jamespascoe/523a5cf4114a1230b4d8a386bb8cd8ba">Lua Callback: SWIG Typemap</a></h2>
+            <pre><code class="stretch" data-trim data-line-numbers="|1-3|5-17|19|">
+%typemap(typecheck) Example::Callback & {
+  $1 = lua_isfunction(L, $input);
+}
+
+%typemap(in) Example::Callback & (Example::Callback temp) {
+  // Create a reference to the Lua callback
+  SWIGLUA_REF fn;
+  swiglua_ref_set(&fn, L, $input);
+
+  temp = [&fn]() {
+    swiglua_ref_get(&fn);
+
+    lua_pcall(fn.L, 0, 0, 0);
+  };
+
+  $1 = &temp;
+}
+
+// %include source files AFTER typemap declarations
+            </code></pre>
+          </section>
+
+        </section>
+        <section>
+
+          <section data-background-video="media/BluWireless_HST_Background.mp4" data-background-video-loop=true>
+            <h1>Actions</h1>
+          </section>
+
+          <section>
+            <h2>LuaChat Actions</h2>
+              <ul>
+                <span class="fragment" style="color:yellow">
+                  <li>
+                    <a href=https://github.com/jamespascoe/LuaChat/blob/master/src/actions/lua_chat_action_talk.cpp>Talk</a>:
+                    sends messages to a remote LuaChat
+                  </li>
+                </span>
+                <span class="fragment"><ul><li>Based on Asio - must also act as a server</li></ul></span>
+                  <span class="fragment"><ul><li>Use TCP for fault-tolerant in-order delivery</li></ul></span>
+                  <span class="fragment"><ul><li>One asynchronous TCP connection per message</li></ul></span>
+                  <span class="fragment" style="color:yellow">
+                    <li>
+                      <a href=https://github.com/jamespascoe/LuaChat/blob/master/src/actions/lua_chat_action_timer.cpp>Timer</a>:
+                      implements blocking and non-blocking waits
+                    </li>
+                  </span>
+                  <span class="fragment"><ul><li>Use Asio - required for Lua coroutine dispatcher</li></ul></span>
+                <span class="fragment" style="color:yellow">
+                  <li>
+                    <a href=https://github.com/jamespascoe/LuaChat/blob/master/src/actions/lua_chat_action_log.cpp>Log</a>:
+                    wraps spdlog primitives
+                  </li>
+                </span>
+              </ul>
+          </section>
+
+          <section>
+            <h2><a href="http://think-async.com/Asio/asio-1.12.2/doc/asio/tutorial/tutdaytime3.html#asio.tutorial.tutdaytime3.the_tcp_connection_class">TCP Connections</a></h2>
+
+            </code></pre>
+            <pre><code class="c++ stretch" data-trim data-line-numbers="|4-8,15-16|10-12,18-19|">
+class tcp_connection
+{
+public:
+  using pointer = std::shared_ptr&lttcp_connection&gt;
+
+  static pointer create(asio::io_context& io_context) {
+    return pointer(new tcp_connection(io_context));
+  }
+
+  asio::ip::tcp::socket& socket() { return m_socket; }
+
+  std::string& data() { return m_data; }
+
+private:
+  tcp_connection(asio::io_context& io_context)
+    : m_socket(io_context) {}
+
+  asio::ip::tcp::socket m_socket;
+  std::string m_data;
+};
+            </code></pre>
+          </section>
+
+          <section>
+            <h2>Connection Handling</h2>
+            </code></pre>
+            <pre><code class="c++ stretch" data-trim data-line-numbers="|2-3|4|12-20|6|">
+Talk::Talk(unsigned short port)
+    : m_acceptor(m_io_context,
+                tcp::endpoint(tcp::v4(), port)) {
+  start_accept();
+
+  m_thread = std::thread([this](){ m_io_context.run(); });
+
+  log_trace("Talk action starting");
+}
+
+void Talk::start_accept() {
+  tcp_connection::pointer connection =
+      tcp_connection::create(
+        m_acceptor.get_executor().context()
+      );
+
+  m_acceptor.async_accept(connection-&gtsocket(),
+      [this, connection](const asio::error_code& error) {
+        handle_accept(connection, error);
+      }
+  );
+}
+            </code></pre>
+          </section>
+
+          <section>
+            <h2>Accepting Connections</h2>
+            </code></pre>
+            <pre><code class="c++ stretch" data-trim data-line-numbers="|6-15|19|">
+void Talk::handle_accept(tcp_connection::pointer connection,
+                         asio::error_code const& error) {
+  if (!error) {
+    log_debug("Accepted message connection");
+
+    asio::async_read(
+      connection-&gtsocket(),
+      asio::dynamic_buffer(connection-&gtdata()),
+      [this, connection](
+        const asio::error_code& error,
+        std::size_t bytes_transferred)
+        {
+          handle_read(error, bytes_transferred, connection);
+        }
+    );
+  } else
+    log_error("Talk accept failed: {}", error.message());
+
+  start_accept();
+}
+            </code></pre>
+          </section>
+
+          <section>
+            <h2>Storing Data</h2>
+            </code></pre>
+            <pre><code class="c++ stretch" data-trim data-line-numbers="|4-5|7-12|">
+void Talk::handle_read(asio::error_code const& error,
+                       std::size_t bytes_transferred,
+                       tcp_connection::pointer connection) {
+  // Check error - 'eof' means remote connection closed
+  if (!error || error == asio::error::eof) {
+
+    // Limit the message array
+    if (m_messages.size() &gt max_messages)
+      m_messages.erase(m_messages.begin());
+
+    // Store the message for Lua retrieval
+    m_messages.emplace_back(connection-&gtdata());
+
+    log_info("Received message ({} bytes): {}",
+             bytes_transferred,
+             connection-&gtdata());
+  } else
+    log_error("Talk read failed: {}", error.message());
+}
+            </code></pre>
+          </section>
+
+          <section>
+            <h2>Lua Retrieval</h2>
+            </code></pre>
+            <pre><code class="c++" data-trim data-line-numbers="">
+std::string Talk::GetNextMessage(void) {
+  if (!IsMessageAvailable())
+    return "";
+
+  std::string ret = m_messages.front();
+
+  m_messages.erase(m_messages.begin());
+
+  return ret;
+}
+            </code></pre>
+          </section>
+
+        </section>
+        <section>
+
+        <section data-background-video="media/BluWireless_HST_Background.mp4" data-background-video-loop=true>
+          <h1>Behaviour</h1>
+        </section>
+
+        <section>
+          <h2>Coroutines</h2>
+            <ul>
+              <span class="fragment"><li>Great for event-driven asynchronous systems</li></span>
+              <span class="fragment"><li><a href="https://www.lua.org/pil/9.1.html">Lua coroutines</a> are stackful</li></span>
+              <span class="fragment"><li><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/n4775.pdf">C++20 coroutines</a> are stackless</li></span>
+              <span class="fragment"><li>Single threaded so lock-free, no races etc.</li></span>
+              <span class="fragment"><li>Implement your own dispatcher in Lua</li></span>
+            </ul>
+        </section>
+
+        <section>
+          <h2><a href="https://github.com/bluwireless/LuaChat/blob/master/behaviours/lua_chat.lua">LuaChat Behaviour</a></h2>
+            <ul>
+              <span class="fragment"><li>Sender coroutine: sends user input to peer</li></span>
+              <span class="fragment"><li>Receiver coroutine: prints received messages</li></span>
+              <span class="fragment"><li>Dispatcher coroutine: schedules sender and receiver</li></span>
+              <span class="fragment"><li>main: processes arguments and creates coroutines</li></span>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Sender Coroutine</h2>
+            <pre class="stretch"><code class="lua" data-trim data-line-numbers="|5|5-12|14-20|24|">
+function sender (talk, host, port)
+
+  while true do
+
+    local ret = require 'posix'.rpoll(0, 1000)
+    if (ret == 1) then
+      local message = io.read()
+      if (message ~= "") then
+
+        local ret = talk:Send(
+          tostring(host), tostring(port), tostring(message)
+        )
+
+        if (ret == Actions.Talk.ErrorType_SUCCESS) then
+          Actions.Log.info(
+            string.format(
+              "Message sent to %s:%s %s", host, port, message
+            )
+          )
+        end
+      end
+    end
+
+    coroutine.yield()
+
+  end
+
+end
+            </code></pre>
+          </section>
+
+        <section>
+            <h2>Receiver Coroutine</h2>
+            <pre class="stretch"><code class="lua" data-trim data-line-numbers="|6-8|10|12-16|18|">
+function receiver (talk, host, port)
+
+  while true do
+
+    -- Yield until a message arrives, at which point, print it
+    repeat
+      coroutine.yield()
+    until talk:IsMessageAvailable()
+
+    local message = talk:GetNextMessage()
+
+    Actions.Log.info(
+      string.format(
+        "Received from %s:%s %s", host, port, message
+      )
+    )
+
+    print(host .. ":" .. tostring(port) .. "&gt " .. message)
+
+  end
+
+end
+            </code></pre>
+          </section>
+
+          <section>
+            <h2><a href="https://www.lua.org/pil/9.4.html">Dispatcher</a></h2>
+            <pre class="stretch"><code class="lua" data-trim data-line-numbers="|3|6|8-9|11-24|27|">
+function dispatcher (coroutines)
+
+  local timer = Actions.Timer()
+
+  while true do
+    if next(coroutines) == nil then break end -- no coroutines
+
+    for name, co in pairs(coroutines) do
+      local status, result = coroutine.resume(co)
+
+      if result then -- coroutine has exited
+
+        if type(result) == "string" then -- runtime error
+          Actions.Log.critical(
+            "Coroutine '" .. tostring(name) .. "' error " .. result
+          )
+        else
+          Actions.Log.warn(
+            "Coroutine '" .. tostring(name) .. "' exited"
+          )
+        end
+
+        coroutines[name] = nil
+      end
+    end
+
+    timer(Actions.Timer.WaitType_BLOCK, 1, "ms", 0xffffffff)
+
+  end
+end
+            </code></pre>
+          </section>
+        </section>
+
+
+        <section>
+
+        <section data-background-video="media/BluWireless_HST_Background.mp4" data-background-video-loop=true>
+          <h1>Performance</h1>
+        </section>
+
+          <section>
+            <h2>Measurement</h2>
+            <span class="fragment" style="color:yellow">How do we compare performance?</span><br>
+            <p>
+            <ul>
+              <span class="fragment"><li>Benchmark Suites e.g. <a href="https://github.com/ThePhD/lua-bindings-shootout">Lua Bindings Shootout</a></li></span>
+              <ul>
+                <span class="fragment"><li>16 Lua Bindings</li></span>
+                <span class="fragment"><li><a href="https://github.com/ThePhD/sol2.git">Sol3 3.2.3</a> and <a href="http://www.swig.org/">SWIG 4.0.2</a> (<a href="http://www.lua.org/versions.html#5.4">Lua 5.4.2</a>)</li></span>
+                <span class="fragment"><li><a href="https://en.wikichip.org/wiki/intel/core_i5/i5-6200u">x86-64 i5-6200u</a> and <a href="https://en.wikipedia.org/wiki/Comparison_of_ARMv8-A_cores">Embedded ARMv8</a></li></span>
+                <span class="fragment"><ul><li>64 bit dual core (4 threads) Skylake</li></ul></span>
+                <span class="fragment"><ul><li>2.3 Ghz, L1 128 KiB, L2 512 KiB, L3 3 MiB</li></ul></span>
+                <span class="fragment"><li><a href="https://llvm.org/">Clang 9/10/11</a></li></span>
+              </ul>
+            </ul>
+          </section>
+
+          <section data-menu-title="Bindings by Compiler">
+            <h3>Lua Bindings by Compiler (x86-64 i5-6200u)</h3>
+            <canvas data-chart="horizontalBar" data-chart-src="benchmark-results/results-release-common.csv">
+              <!--
+                {
+                  "data" : {
+                    "datasets" : [
+                      { "backgroundColor": "rgba(20,220,220,.8)" },
+                      { "backgroundColor": "rgba(220,120,120,.8)" },
+                      { "backgroundColor": "rgba(20,120,220,.8)" }
+                    ]
+                  },
+                  "options": {
+                    "responsive": true,
+                    "scales": {
+                      "xAxes": [{
+                          "stacked": true,
+                          "scaleLabel": {"display": true, "labelString": "Time (nanoseconds)"}
+                        }],
+                      "yAxes": [{ "stacked": true }]
+                    }
+                  }
+                }
+                -->
+            </canvas>
+          </section>
+
+          <section data-menu-title="Lua Bindings: x86-64">
+            <h3>Select Lua Bindings: x86-64 i5-6200u</h3>
+            <canvas data-chart="bar">
+            <!--
+            {
+              "data" : {
+                "labels" : ["Lua C API", "Sol2", "Sol3", "SWIG"],
+                "datasets" : [
+                {
+                  "label": "C Function Call",
+                  "data": [2482, 2690, 2819, 3002]
+                }, {
+                  "label": "Member Function Call",
+                  "data": [6397, 6322, 6421, 22294]
+                }, {
+                  "label": "Userdata Variable Access",
+                  "data": [6879, 10666, 10217, 17571]
+                }, {
+                  "label": "Multi Return from Lua",
+                  "data": [3438, 3289, 3920, 3899]
+                }, {
+                  "label": "Return Userdata",
+                  "data": [9321, 9663, 12176, 16864]
+                }, {
+                  "label": "Implicit Inheritance",
+                  "data": [4694, 26914, 15866, 9412]
+                }]
+              },
+              "options" : {
+                "legend":
+                {
+                  "labels": {"boxWidth":10}
+                },
+                "scales":
+                {
+                  "yAxes": [
+                  {
+                    "ticks": {"beginAtZero":true},
+                    "scaleLabel": {"display": true, "labelString": "Time (nanoseconds)"}
+                  }]
+                }
+              }
+            }
+            -->
+            </canvas>
+          </section>
+          <section data-menu-title="Lua Bindings: ARMv8">
+            <h3>Select Lua Bindings: Embedded ARMv8</h3>
+            <canvas data-chart="bar">
+            <!--
+            {
+              "data" : {
+                "labels" : ["Lua C API", "Sol2", "Sol3", "SWIG"],
+                "datasets" : [
+                {
+                  "label": "C Function Call",
+                  "data": [12598, 13729, 14651, 14619]
+                }, {
+                  "label": "Member Function Call",
+                  "data": [31004, 31775, 33898, 101029]
+                }, {
+                  "label": "Userdata Variable Access",
+                  "data": [35885, 49216, 48301, 79762]
+                }, {
+                  "label": "Multi Return from Lua",
+                  "data": [16797, 17249, 18798, 19161]
+                }, {
+                  "label": "Return Userdata",
+                  "data": [51986, 44861, 50627, 75634]
+                }, {
+                  "label": "Implicit Inheritance",
+                  "data": [23510, 127906, 72555, 47444]
+                }]
+              },
+              "options" : {
+                "legend":
+                {
+                  "labels": {"boxWidth":10}
+                },
+                "scales":
+                {
+                  "yAxes": [
+                  {
+                    "ticks": {"beginAtZero":true},
+                    "scaleLabel": {"display": true, "labelString": "Time (nanoseconds)"}
+                  }]
+                }
+              }
+            }
+            -->
+            </canvas>
+          </section>
+
+          <section data-menu-title="Bindings Performance: x86-64">
+            <h3>Aggregated Bindings: x86-64 i5-6200u</h3>
+              <canvas data-chart="bar">
+              <!--
+              {
+                "data" : {
+                  "labels" : ["Lua C API", "Sol2", "Sol3", "SWIG"],
+                  "datasets" : [{
+                    "label": "x86-64 i5-6200u",
+                    "backgroundColor": [ "rgba(220,120,120,.8)", "rgba(220,120,120,.8)",
+                                         "rgba(220,120,120,.8)", "rgba(220,120,120,.8)" ],
+                    "data": [33211, 59544, 51419, 73042]
+                   }]
+                },
+                "options" : {
+                  "legend":
+                  {
+                    "labels": {"boxWidth":10}
+                  },
+                  "scales":
+                  {
+                    "yAxes": [
+                    {
+                      "ticks": {"beginAtZero": true},
+                      "scaleLabel": {"display": true, "labelString": "Time (nanoseconds)"}
+                    }]
+                  }
+                }
+              }
+              -->
+              </canvas>
+          </section>
+
+          <section data-menu-title="Bindings Performance: ARMv8">
+            <h3>Aggregated Bindings: Embedded ARMv8</h3>
+              <canvas data-chart="bar">
+              <!--
+              {
+                "data" : {
+                  "labels" : ["Lua C API", "Sol2", "Sol3", "SWIG"],
+                  "datasets" : [{
+                    "label": "Embedded ARMv8",
+                    "data": [171780, 284736, 238830, 290205]
+                   }]
+                },
+                "options" : {
+                  "legend":
+                  {
+                    "labels": {"boxWidth":10}
+                  },
+                  "scales":
+                  {
+                    "yAxes": [
+                    {
+                      "ticks": {"beginAtZero":true},
+                      "scaleLabel": {"display": true, "labelString": "Time (nanoseconds)"}
+                    }]
+                  }
+                }
+              }
+              -->
+              </canvas>
+          </section>
+
+        </section>
+
+        <section data-background-video="media/BluWireless_HST_Background.mp4" data-background-video-loop=true>
+          <h1>Conclusion</h1>
+        </section>
+
+        <section>
+          <h2>Performance Advice</h2>
+            <ul>
+              <span class="fragment" style="color:yellow"><li>Sol3 is fast but you can go faster</li></span>
+              <ul>
+                <span class="fragment"><li>lots of good advice <a href="https://sol2.readthedocs.io/en/latest/performance.html">here</a></li></span>
+              </ul>
+              <span class="fragment" style="color:yellow"><li>MCM spends a lot of time in the SWIG wrapper</li></span>
+              <ul>
+                <span class="fragment"><li>prefer lightweight typemaps</li></span>
+              </ul>
+              <span class="fragment" style="color:yellow"><li>The partition between C++ and Lua is important</li></span>
+              <ul>
+                <span class="fragment"><li>as is the concurrency design</li></span>
+              </ul>
+              <span class="fragment" style="color:yellow"><li>How the code interacts with Lua is significant</li></span>
+              <ul>
+                <span class="fragment"><li>prefer pre-compiled long-lived behaviours</li></span>
+              </ul>
+            </ul>
+        </section>
+
+        <section>
+          <h2>Conclusion</h2>
+            <ul>
+              <span class="fragment" style="color:yellow"><li>The combination of C++ and Lua is powerful</li></span>
+              <ul>
+                <span class="fragment"><li>Actions (C++) and Behaviours (Lua)</li></span>
+              </ul>
+              <span class="fragment" style="color:yellow"><li>Sol3 binds Modern C++ to Lua</li></span>
+              <ul>
+                <span class="fragment"><li>simple-to-use, fast, ideal for Modern C++</li></span>
+                <span class="fragment"><li>by definition is a C++ to Lua binding</li></span>
+              </ul>
+              <span class="fragment" style="color:yellow"><li>SWIG allows us to map C++ types to/from Lua</li></span>
+              <ul>
+                <span class="fragment"><li>generates bindings in many languages</li></span>
+                <span class="fragment"><li>be mindful of performance</li></span>
+              </ul>
+              <span class="fragment" style="color:yellow"><li><a href="https://www.lua.org/versions.html#5.4">Lua 5.4.2</a> is now available</li></span>
+              <ul>
+                <span class="fragment"><li><a href="https://foicica.com/lua/">Lua Quick Reference</a> (updated for Lua 5.4)</li></span>
+              </ul>
+            </ul>
+        </section>
+
+        <section>
+          <h2>Questions?</h2>
+          <p><p>
+          <a href="http://www.james-pascoe.com">http://www.james-pascoe.com</a><br>
+          <a href="mailto:james@james-pascoe.com">james@james-pascoe.com</a><p>
+
+          <a href="http://jamespascoe.github.io/accu2021">http://jamespascoe.github.io/accu2021</a><br>
+          <a href="https://github.com/bluwireless/LuaChat.git">https://github.com/jamespascoe/LuaChat.git</a>
+        </section>
+
+        </section>
+      </div>
+    </div>
+
+    <script src="dist/reveal.js"></script>
+    <script src="plugin/notes/notes.js"></script>
+    <script src="plugin/markdown/markdown.js"></script>
+    <script src="plugin/highlight/highlight.js"></script>
+    <script src="plugin/menu/menu.js"></script>
+    <script src="plugin/chart/Chart.min.js"></script>
+    <script src="plugin/chart/plugin.js"></script>
+    <script>
+      // More info about initialization & config:
+      // - https://revealjs.com/initialization/
+      // - https://revealjs.com/config/
+      Reveal.initialize({
+        hash: true,
+        controls: true,
+        totalTime: 5400,
+        hideInactiveCursor: true,
+        hideCursorTime: 2000,
+        hideAddressBar: true,
+        preloadIframes: true,
+        progress: false,
+        touch: true,
+        keyboard: {
+          67: () => { /* Keycode for the letter 'c' i.e. 'controls' */
+            var currentSlide = Reveal.getCurrentSlide();
+            var currentVideo = currentSlide.slideBackgroundElement.getElementsByTagName('video')[0];
+            if (currentVideo) {
+              /* Toggle video controls on/off */
+              currentVideo.controls = !currentVideo.controls
+            }
+          },
+          32: () => { /* Keycode for spacebar */
+            var currentSlide = Reveal.getCurrentSlide();
+            var currentVideo = currentSlide.slideBackgroundElement.getElementsByTagName('video')[0];
+            if (currentVideo) {
+              /* Pause/resume video when the spacebar is pressed */
+              if (currentVideo.paused == true) currentVideo.play();
+              else currentVideo.pause();
+            }
+            else {
+              /* Advance to next slide if no video (default Reveal behaviour) */
+              Reveal.next();
+            }
+          }
+        },
+        chart: {
+          defaults: {
+            global: {
+              title: { fontColor: "#FFF" },
+              legend: {
+                position: "bottom",
+                labels: { fontColor: "#FFF" },
+              },
+              tooltips: {
+                labels: { fontColor: "#FFF" },
+              },
+            },
+            scale: {
+              scaleLabel: { fontColor: "#FFF" },
+              gridLines: { color: "#FFF", zeroLineColor: "#FFF" },
+              ticks: { fontColor: "#FFF" },
+            }
+          },
+          bar: { backgroundColor: [ "rgba(20,220,220,.8)" , "rgba(220,120,120,.8)", "rgba(20,120,220,.8)", "rgba(255, 159, 64, .8)","rgba(255, 205, 86, .8)", "rgba(153, 102, 255, .8)" ]},
+        },
+        menu: {
+          themes: true,
+          delayInit: true
+        },
+        pdfSeparateFragments: false,
+        // Learn about plugins: https://revealjs.com/plugins/
+        plugins: [ RevealMarkdown, RevealHighlight, RevealNotes, RevealMenu, RevealChart ]
+      });
+
+      Reveal.addEventListener('hideControls', function() {
+        Reveal.configure({controls: false});
+      }, false );
+
+      Reveal.addEventListener('slidechanged', function() {
+        /* Ensure that the Reveal controls and Menu are available on
+         * all slides other than the 'Title-Slide'.
+         */
+        slide_id = Reveal.getCurrentSlide().getAttribute("id");
+
+        if (slide_id !== "Title-Slide") {
+          config = Reveal.getConfig();
+          if (config["controls"] !== true) {
+            Reveal.configure({controls: true});
+          }
+
+          menu = Reveal.getPlugin("menu");
+          if (!menu.isMenuInitialised()) {
+            menu.initialiseMenu();
+          }
+        }
+      }, false );
+   </script>
+  </body>
+</html>

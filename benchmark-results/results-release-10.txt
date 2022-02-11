@@ -1,0 +1,370 @@
+2021-02-12T17:58:18+00:00
+
+https://en.wikichip.org/wiki/intel/core_i5/i5-6200u
+
+Running ./x64/bin/lua_bindings_shootout
+Run on (4 X 2800 MHz CPU s)
+CPU Caches:
+  L1 Data 32 KiB (x2)
+  L1 Instruction 32 KiB (x2)
+  L2 Unified 256 KiB (x2)
+  L3 Unified 3072 KiB (x1)
+Load Average: 1.69, 1.73, 1.34
+***WARNING*** CPU scaling is enabled, the benchmark real time measurements may be noisy and will incur extra overhead.
+
+-------------------------------------------------------------------------------------------------
+Benchmark                                                       Time             CPU   Iterations
+-------------------------------------------------------------------------------------------------
+luawrapper_table_global_string_get_measure                   21.9 ns         21.9 ns     30770887
+luawrapper_table_global_string_set_measure                   17.9 ns         17.8 ns     36575764
+luawrapper_table_get_measure                                 47.7 ns         47.7 ns     13455268
+luawrapper_table_set_measure                                 43.3 ns         43.3 ns     16890074
+luawrapper_table_chained_get_measure                         83.9 ns         83.9 ns      7682529
+luawrapper_table_chained_set_measure                         60.7 ns         60.7 ns     11571022
+luawrapper_c_function_measure                                3795 ns         3795 ns       184617
+luawrapper_c_function_through_lua_in_c_measure                110 ns          110 ns      6592788
+luawrapper_lua_function_in_c_measure                          120 ns          120 ns      7220888
+luawrapper_member_function_call_measure                     19375 ns        19356 ns        34951
+luawrapper_userdata_variable_access_measure                 24798 ns        24792 ns        28344
+luawrapper_userdata_variable_access_large_measure         1357233 ns      1357221 ns          532
+luawrapper_userdata_variable_access_last_measure            25592 ns        25586 ns        28406
+luawrapper_multi_return_lua_measure                          4522 ns         4522 ns       168220
+luawrapper_multi_return_measure                               183 ns          183 ns      3632686
+luawrapper_stateful_function_object_measure                   127 ns          127 ns      4441796
+luawrapper_base_derived_measure                        ERROR OCCURRED: 'unsupported'
+luawrapper_return_userdata_measure                          40022 ns        40014 ns        17706
+luawrapper_optional_success_measure                    ERROR OCCURRED: 'unsupported'
+luawrapper_optional_half_failure_measure               ERROR OCCURRED: 'unsupported'
+luawrapper_optional_failure_measure                    ERROR OCCURRED: 'unsupported'
+luawrapper_implicit_inheritance_measure                ERROR OCCURRED: 'unsupported'
+luacppinterface_table_global_string_get_measure              52.9 ns         52.9 ns     13262384
+luacppinterface_table_global_string_set_measure              49.0 ns         49.0 ns     14386865
+luacppinterface_table_get_measure                            52.6 ns         52.6 ns     13215561
+luacppinterface_table_set_measure                            48.7 ns         48.7 ns     14359506
+luacppinterface_table_chained_get_measure                     410 ns          410 ns      1696751
+luacppinterface_table_chained_set_measure                     412 ns          412 ns      1709223
+luacppinterface_c_function_measure                           7515 ns         7515 ns        93538
+luacppinterface_c_function_through_lua_in_c_measure           159 ns          159 ns      4510053
+luacppinterface_lua_function_in_c_measure                    73.8 ns         73.8 ns     10179911
+luacppinterface_member_function_call_measure                11577 ns        11575 ns        59227
+luacppinterface_userdata_variable_access_measure       ERROR OCCURRED: 'unsupported'
+luacppinterface_userdata_variable_access_large_measure ERROR OCCURRED: 'unsupported'
+luacppinterface_userdata_variable_access_last_measure  ERROR OCCURRED: 'unsupported'
+luacppinterface_multi_return_measure                   ERROR OCCURRED: 'unsupported'
+luacppinterface_multi_return_lua_measure               ERROR OCCURRED: 'unsupported'
+luacppinterface_stateful_function_object_measure              144 ns          144 ns      4798903
+luacppinterface_base_derived_measure                   ERROR OCCURRED: 'unsupported'
+luacppinterface_return_userdata_measure                     99995 ns        99980 ns        12749
+luacppinterface_optional_success_measure               ERROR OCCURRED: 'unsupported'
+luacppinterface_optional_half_failure_measure          ERROR OCCURRED: 'unsupported'
+luacppinterface_optional_failure_measure               ERROR OCCURRED: 'unsupported'
+luacppinterface_implicit_inheritance_measure           ERROR OCCURRED: 'unsupported'
+swig_table_global_string_get_measure                   ERROR OCCURRED: 'unsupported'
+swig_table_global_string_set_measure                   ERROR OCCURRED: 'unsupported'
+swig_table_get_measure                                 ERROR OCCURRED: 'unsupported'
+swig_table_set_measure                                 ERROR OCCURRED: 'unsupported'
+swig_table_chained_get_measure                         ERROR OCCURRED: 'unsupported'
+swig_table_chained_set_measure                         ERROR OCCURRED: 'unsupported'
+swig_c_function_measure                                      2955 ns         2955 ns       228576
+swig_c_function_through_lua_in_c_measure               ERROR OCCURRED: 'unsupported'
+swig_lua_function_in_c_measure                         ERROR OCCURRED: 'unsupported'
+swig_member_function_call_measure                           23664 ns        23659 ns        31449
+swig_userdata_variable_access_measure                       17062 ns        17062 ns        40499
+swig_userdata_variable_access_large_measure            ERROR OCCURRED: 'unsupported'
+swig_userdata_variable_access_last_measure             ERROR OCCURRED: 'unsupported'
+swig_multi_return_measure                              ERROR OCCURRED: 'unsupported'
+swig_multi_return_lua_measure                                3871 ns         3870 ns       179646
+swig_stateful_function_object_measure                  ERROR OCCURRED: 'unsupported'
+swig_base_derived_measure                              ERROR OCCURRED: 'unsupported'
+swig_return_userdata_measure                                15511 ns        15511 ns        34720
+swig_optional_success_measure                          ERROR OCCURRED: 'unsupported'
+swig_optional_half_failure_measure                     ERROR OCCURRED: 'unsupported'
+swig_optional_failure_measure                          ERROR OCCURRED: 'unsupported'
+swig_implicit_inheritance_measure                            9988 ns         9986 ns        69031
+toluapp_table_global_string_get_measure                ERROR OCCURRED: 'unsupported'
+toluapp_table_global_string_set_measure                ERROR OCCURRED: 'unsupported'
+toluapp_table_get_measure                              ERROR OCCURRED: 'unsupported'
+toluapp_table_set_measure                              ERROR OCCURRED: 'unsupported'
+toluapp_table_chained_get_measure                      ERROR OCCURRED: 'unsupported'
+toluapp_table_chained_set_measure                      ERROR OCCURRED: 'unsupported'
+toluapp_c_function_measure                                   3478 ns         3478 ns       199065
+toluapp_c_function_through_lua_in_c_measure            ERROR OCCURRED: 'unsupported'
+toluapp_lua_function_in_c_measure                      ERROR OCCURRED: 'unsupported'
+toluapp_member_function_call_measure                        28833 ns        28827 ns        24182
+toluapp_userdata_variable_access_measure                    21480 ns        21480 ns        32793
+toluapp_userdata_variable_access_large_measure         ERROR OCCURRED: 'unsupported'
+toluapp_userdata_variable_access_last_measure          ERROR OCCURRED: 'unsupported'
+toluapp_multi_return_lua_measure                       ERROR OCCURRED: 'unsupported'
+toluapp_multi_return_measure                           ERROR OCCURRED: 'unsupported'
+toluapp_stateful_function_object_measure               ERROR OCCURRED: 'unsupported'
+toluapp_base_derived_measure                           ERROR OCCURRED: 'unsupported'
+toluapp_return_userdata_measure                             54310 ns        54310 ns        10000
+toluapp_optional_success_measure                       ERROR OCCURRED: 'unsupported'
+toluapp_optional_half_failure_measure                  ERROR OCCURRED: 'unsupported'
+toluapp_optional_failure_measure                       ERROR OCCURRED: 'unsupported'
+toluapp_implicit_inheritance_measure                        14292 ns        14289 ns        49538
+luabind_table_global_string_get_measure                       209 ns          209 ns      3351574
+luabind_table_global_string_set_measure                       113 ns          113 ns      6211963
+luabind_table_get_measure                                     241 ns          241 ns      2974586
+luabind_table_set_measure                                     153 ns          153 ns      4508510
+luabind_table_chained_get_measure                             267 ns          267 ns      2557202
+luabind_table_chained_set_measure                             177 ns          177 ns      3778959
+luabind_c_function_measure                                   3353 ns         3353 ns       209489
+luabind_c_function_through_lua_in_c_measure                  74.8 ns         74.8 ns      9199309
+luabind_lua_function_in_c_measure                            62.2 ns         62.2 ns     11403776
+luabind_member_function_call_measure                        14152 ns        14152 ns        49670
+luabind_userdata_variable_access_measure                    15239 ns        15237 ns        45970
+luabind_userdata_variable_access_large_measure             787259 ns       787258 ns          906
+luabind_userdata_variable_access_last_measure               15104 ns        15101 ns        47231
+luabind_multi_return_lua_measure                       ERROR OCCURRED: 'unsupported'
+luabind_multi_return_measure                           ERROR OCCURRED: 'unsupported'
+luabind_stateful_function_object_measure                      236 ns          236 ns      2968705
+luabind_base_derived_measure                           ERROR OCCURRED: 'unsupported'
+luabind_return_userdata_measure                             23111 ns        23107 ns        36437
+luabind_optional_failure_measure                              159 ns          159 ns      4329647
+luabind_optional_half_failure_measure                         358 ns          358 ns      1873872
+luabind_optional_success_measure                              347 ns          347 ns      1922276
+luabind_implicit_inheritance_measure                   ERROR OCCURRED: 'unsupported'
+lua_api_pp_table_global_string_get_measure                   25.7 ns         25.7 ns     30474704
+lua_api_pp_table_global_string_set_measure                   21.7 ns         21.7 ns     32226159
+lua_api_pp_table_get_measure                                 28.6 ns         28.6 ns     23576594
+lua_api_pp_table_set_measure                                 20.9 ns         20.9 ns     33335334
+lua_api_pp_table_chained_get_measure                         77.3 ns         77.3 ns      9079230
+lua_api_pp_table_chained_set_measure                         64.7 ns         64.7 ns     10896613
+lua_api_pp_c_function_measure                                3525 ns         3525 ns       198781
+lua_api_pp_c_function_through_lua_in_c_measure               73.0 ns         73.0 ns      9588811
+lua_api_pp_lua_function_in_c_measure                         56.9 ns         56.9 ns     12470940
+lua_api_pp_member_function_call_measure                     12685 ns        12683 ns        56135
+lua_api_pp_userdata_variable_access_measure            ERROR OCCURRED: 'unsupported'
+lua_api_pp_userdata_variable_access_large_measure      ERROR OCCURRED: 'unsupported'
+lua_api_pp_userdata_variable_access_last_measure       ERROR OCCURRED: 'unsupported'
+lua_api_pp_multi_return_lua_measure                          4143 ns         4143 ns       158495
+lua_api_pp_multi_return_measure                              74.4 ns         74.4 ns      9436876
+lua_api_pp_stateful_function_object_measure            ERROR OCCURRED: 'unsupported'
+lua_api_pp_base_derived_measure                        ERROR OCCURRED: 'unsupported'
+lua_api_pp_return_userdata_measure                           7004 ns         7004 ns       102398
+lua_api_pp_optional_success_measure                           143 ns          143 ns      5217859
+lua_api_pp_optional_half_failure_measure                     80.1 ns         80.1 ns      8806685
+lua_api_pp_optional_failure_measure                          30.4 ns         30.4 ns     20173691
+lua_api_pp_implicit_inheritance_measure                ERROR OCCURRED: 'unsupported'
+oolua_table_global_string_get_measure                        20.0 ns         20.0 ns     28264858
+oolua_table_global_string_set_measure                        23.1 ns         23.1 ns     35122899
+oolua_table_get_measure                                      38.2 ns         38.2 ns     16532907
+oolua_table_set_measure                                      40.7 ns         40.7 ns     17255611
+oolua_table_chained_get_measure                               327 ns          327 ns      2634556
+oolua_table_chained_set_measure                               312 ns          312 ns      2024163
+oolua_c_function_measure                                     3121 ns         3121 ns       224869
+oolua_c_function_through_lua_in_c_measure                    72.2 ns         72.2 ns      9506500
+oolua_lua_function_in_c_measure                              69.7 ns         69.7 ns      9903191
+oolua_member_function_call_measure                           7242 ns         7242 ns        98447
+oolua_userdata_variable_access_measure                 ERROR OCCURRED: 'unsupported'
+oolua_userdata_variable_access_large_measure           ERROR OCCURRED: 'unsupported'
+oolua_userdata_variable_access_last_measure            ERROR OCCURRED: 'unsupported'
+oolua_multi_return_measure                                   99.8 ns         99.8 ns      7008276
+oolua_multi_return_lua_measure                               4459 ns         4459 ns       160835
+oolua_stateful_function_object_measure                 ERROR OCCURRED: 'unsupported'
+oolua_base_derived_measure                             ERROR OCCURRED: 'unsupported'
+oolua_return_userdata_measure                               29116 ns        29110 ns        24452
+oolua_optional_success_measure                         ERROR OCCURRED: 'unsupported'
+oolua_optional_half_failure_measure                    ERROR OCCURRED: 'unsupported'
+oolua_optional_failure_measure                         ERROR OCCURRED: 'unsupported'
+oolua_implicit_inheritance_measure                           3154 ns         3154 ns       220714
+luabridge_table_global_string_get_measure                     113 ns          113 ns      5907792
+luabridge_table_global_string_set_measure                    21.7 ns         21.7 ns     32331155
+luabridge_table_get_measure                                   190 ns          189 ns      3622588
+luabridge_table_set_measure                                   174 ns          174 ns      4164631
+luabridge_table_chained_get_measure                           498 ns          498 ns      1365477
+luabridge_table_chained_set_measure                           495 ns          495 ns      1395355
+luabridge_c_function_measure                                 3125 ns         3125 ns       216194
+luabridge_c_function_through_lua_in_c_measure                 134 ns          134 ns      5160290
+luabridge_lua_function_in_c_measure                           128 ns          128 ns      5525728
+luabridge_member_function_call_measure                      21361 ns        21357 ns        32835
+luabridge_userdata_variable_access_measure                  24611 ns        24611 ns        27958
+luabridge_userdata_variable_access_large_measure       ERROR OCCURRED: 'unsupported'
+luabridge_userdata_variable_access_last_measure        ERROR OCCURRED: 'unsupported'
+luabridge_multi_return_measure                         ERROR OCCURRED: 'unsupported'
+luabridge_multi_return_lua_measure                           7863 ns         7862 ns        88943
+luabridge_stateful_function_object_measure             ERROR OCCURRED: 'unsupported'
+luabridge_base_derived_measure                         ERROR OCCURRED: 'unsupported'
+luabridge_return_userdata_measure                           10292 ns        10290 ns        65066
+luabridge_optional_success_measure                            359 ns          359 ns      1940571
+luabridge_optional_half_failure_measure                       301 ns          301 ns      2209728
+luabridge_optional_failure_measure                           43.7 ns         43.7 ns     18209201
+luabridge_implicit_inheritance_measure                 ERROR OCCURRED: 'unsupported'
+lua_intf_table_global_string_get_measure                     24.5 ns         24.5 ns     28851297
+lua_intf_table_global_string_set_measure                     21.8 ns         21.8 ns     32923048
+lua_intf_table_get_measure                                   34.4 ns         34.4 ns     23264011
+lua_intf_table_set_measure                                   31.5 ns         31.5 ns     25841594
+lua_intf_table_chained_get_measure                            116 ns          116 ns      6071474
+lua_intf_table_chained_set_measure                            317 ns          317 ns      2235307
+lua_intf_c_function_measure                                  3014 ns         3014 ns       233055
+lua_intf_c_function_through_lua_in_c_measure                 61.8 ns         61.8 ns     11390331
+lua_intf_lua_function_in_c_measure                           57.0 ns         57.0 ns     12197548
+lua_intf_member_function_call_measure                       23274 ns        23274 ns        30005
+lua_intf_userdata_variable_access_measure                   30944 ns        30944 ns        22606
+lua_intf_userdata_variable_access_large_measure           1662346 ns      1662355 ns          420
+lua_intf_userdata_variable_access_last_measure              30353 ns        30354 ns        23069
+lua_intf_multi_return_measure                                73.8 ns         73.8 ns      9514393
+lua_intf_multi_return_lua_measure                            4041 ns         4041 ns       170811
+lua_intf_stateful_function_object_measure                    64.2 ns         64.2 ns     10850805
+lua_intf_base_derived_measure                          ERROR OCCURRED: 'unsupported'
+lua_intf_return_userdata_measure                            11585 ns        11583 ns        65899
+lua_intf_optional_success_measure                             188 ns          188 ns      3608707
+lua_intf_optional_half_failure_measure                       94.9 ns         94.9 ns      7472128
+lua_intf_optional_failure_measure                            67.6 ns         67.6 ns     10398254
+lua_intf_implicit_inheritance_measure                  ERROR OCCURRED: 'unsupported'
+luwra_table_global_string_get_measure                        36.4 ns         36.4 ns     17034970
+luwra_table_global_string_set_measure                        30.0 ns         30.0 ns     23851006
+luwra_table_get_measure                                      64.1 ns         64.1 ns     10896025
+luwra_table_set_measure                                      56.6 ns         56.6 ns     13276048
+luwra_table_chained_get_measure                              85.7 ns         85.7 ns      8103661
+luwra_table_chained_set_measure                              81.4 ns         81.4 ns      8725539
+luwra_c_function_measure                                     2943 ns         2942 ns       243957
+luwra_c_function_through_lua_in_c_measure                     154 ns          154 ns      4664596
+luwra_lua_function_in_c_measure                               146 ns          146 ns      4784278
+luwra_member_function_call_measure                           9785 ns         9784 ns        71847
+luwra_userdata_variable_access_measure                 ERROR OCCURRED: 'unsupported'
+luwra_userdata_variable_access_large_measure           ERROR OCCURRED: 'unsupported'
+luwra_userdata_variable_access_last_measure            ERROR OCCURRED: 'unsupported'
+luwra_multi_return_lua_measure                               3626 ns         3625 ns       175433
+luwra_multi_return_measure                             ERROR OCCURRED: 'unsupported'
+luwra_stateful_function_object_measure                        195 ns          195 ns      3826663
+luwra_base_derived_measure                             ERROR OCCURRED: 'unsupported'
+luwra_return_userdata_measure                                7217 ns         7216 ns        98504
+luwra_optional_success_measure                         ERROR OCCURRED: 'unsupported'
+luwra_optional_half_failure_measure                    ERROR OCCURRED: 'unsupported'
+luwra_optional_failure_measure                         ERROR OCCURRED: 'unsupported'
+luwra_implicit_inheritance_measure                     ERROR OCCURRED: 'unsupported'
+plain_c_table_global_string_get_measure                      23.5 ns         23.3 ns     38340577
+plain_c_table_global_string_set_measure                      24.4 ns         24.4 ns     30878418
+plain_c_table_get_measure                                    17.4 ns         17.4 ns     38338027
+plain_c_table_set_measure                                    15.6 ns         15.6 ns     45164889
+plain_c_table_chained_get_measure                            42.9 ns         42.9 ns     14966023
+plain_c_table_chained_set_measure                            45.3 ns         45.3 ns     15813651
+plain_c_c_function_measure                                   3223 ns         3222 ns       273830
+plain_c_c_function_through_lua_in_c_measure                  35.3 ns         35.3 ns     15403390
+plain_c_lua_function_in_c_measure                            34.6 ns         34.6 ns     20444469
+plain_c_member_function_call_measure                         6602 ns         6602 ns       102388
+plain_c_userdata_variable_access_measure                     7013 ns         7013 ns        89361
+plain_c_userdata_variable_access_large_measure             582266 ns       582144 ns         1192
+plain_c_userdata_variable_access_last_measure               10342 ns        10342 ns        67924
+plain_c_multi_return_lua_measure                             3332 ns         3332 ns       213318
+plain_c_multi_return_measure                                 44.6 ns         44.6 ns     15727072
+plain_c_stateful_function_object_measure                     38.5 ns         38.5 ns     18329978
+plain_c_base_derived_measure                                 24.0 ns         24.0 ns     27958579
+plain_c_return_userdata_measure                              9940 ns         9938 ns        66948
+plain_c_optional_failure_measure                             21.0 ns         21.0 ns     33300795
+plain_c_optional_half_failure_measure                        41.5 ns         41.5 ns     19578020
+plain_c_optional_success_measure                             37.2 ns         37.2 ns     16677363
+plain_c_implicit_inheritance_measure                         4442 ns         4442 ns       163602
+selene_table_global_string_get_measure                        211 ns          211 ns      3236370
+selene_table_global_string_set_measure                        199 ns          199 ns      3672534
+selene_table_get_measure                                      429 ns          429 ns      1656922
+selene_table_set_measure                                      403 ns          403 ns      1696752
+selene_table_chained_get_measure                              825 ns          825 ns       847301
+selene_table_chained_set_measure                              810 ns          810 ns       870107
+selene_c_function_measure                                    5997 ns         5997 ns       117205
+selene_c_function_through_lua_in_c_measure                   77.6 ns         77.6 ns      8720517
+selene_lua_function_in_c_measure                             60.6 ns         60.6 ns     11634589
+selene_member_function_call_measure                         16853 ns        16835 ns        39027
+selene_userdata_variable_access_measure                ERROR OCCURRED: 'unsupported'
+selene_userdata_variable_access_large_measure          ERROR OCCURRED: 'unsupported'
+selene_userdata_variable_access_last_measure           ERROR OCCURRED: 'unsupported'
+selene_multi_return_lua_measure                              7690 ns         7690 ns        90747
+selene_multi_return_measure                                  95.9 ns         95.9 ns      7339892
+selene_stateful_function_object_measure                      76.5 ns         76.5 ns      9220702
+selene_base_derived_measure                            ERROR OCCURRED: 'unsupported'
+selene_return_userdata_measure                              23314 ns        23314 ns        31929
+selene_optional_success_measure                               593 ns          593 ns      1188460
+selene_optional_half_failure_measure                          510 ns          510 ns      1192254
+selene_optional_failure_measure                               501 ns          501 ns      1000000
+selene_implicit_inheritance_measure                    ERROR OCCURRED: 'unsupported'
+kaguya_table_global_string_get_measure                       37.9 ns         37.9 ns     19305699
+kaguya_table_global_string_set_measure                       23.7 ns         23.7 ns     29919229
+kaguya_table_get_measure                                     44.5 ns         44.5 ns     17580494
+kaguya_table_set_measure                                     26.1 ns         26.1 ns     26697193
+kaguya_table_chained_get_measure                             86.2 ns         86.2 ns      8193217
+kaguya_table_chained_set_measure                             67.3 ns         67.3 ns     10453435
+kaguya_c_function_measure                                    3115 ns         3114 ns       225835
+kaguya_c_function_through_lua_in_c_measure                   74.3 ns         74.3 ns      9401109
+kaguya_lua_function_in_c_measure                             73.5 ns         73.5 ns      9475505
+kaguya_member_function_call_measure                         11685 ns        11686 ns        59470
+kaguya_userdata_variable_access_measure                ERROR OCCURRED: 'unsupported'
+kaguya_userdata_variable_access_large_measure          ERROR OCCURRED: 'unsupported'
+kaguya_userdata_variable_access_last_measure           ERROR OCCURRED: 'unsupported'
+kaguya_multi_return_measure                                  78.2 ns         78.2 ns      8992351
+kaguya_multi_return_lua_measure                              4016 ns         4016 ns       175085
+kaguya_stateful_function_object_measure                      74.8 ns         74.8 ns      9398055
+kaguya_base_derived_measure                            ERROR OCCURRED: 'unsupported'
+kaguya_base_derived_measure                            ERROR OCCURRED: 'unsupported'
+kaguya_return_userdata_measure                              14365 ns        14362 ns        47714
+kaguya_optional_success_measure                              59.4 ns         59.4 ns     10084565
+kaguya_optional_half_failure_measure                         66.2 ns         66.1 ns      9206023
+kaguya_optional_failure_measure                              56.7 ns         56.7 ns     12393988
+kaguya_implicit_inheritance_measure                         23936 ns        23936 ns        27985
+old_sol_table_global_string_get_measure                      47.3 ns         47.3 ns     14887113
+old_sol_table_global_string_set_measure                      33.4 ns         33.4 ns     20815642
+old_sol_table_get_measure                                    45.9 ns         45.9 ns     14599336
+old_sol_table_set_measure                                    31.9 ns         31.9 ns     21919838
+old_sol_table_chained_get_measure                             427 ns          427 ns      1633977
+old_sol_table_chained_set_measure                             414 ns          413 ns      1688845
+old_sol_c_function_measure                                   3480 ns         3479 ns       201910
+old_sol_c_function_through_lua_in_c_measure                  50.2 ns         49.8 ns     14964487
+old_sol_lua_function_in_c_measure                            43.2 ns         43.2 ns     18236350
+old_sol_member_function_call_measure                        19754 ns        19754 ns        35118
+old_sol_userdata_variable_access_measure                    10932 ns        10932 ns        63254
+old_sol_userdata_variable_access_large_measure             629345 ns       629220 ns         1152
+old_sol_userdata_variable_access_last_measure               10783 ns        10783 ns        65139
+old_sol_multi_return_measure                                 55.6 ns         55.5 ns     12465640
+old_sol_multi_return_lua_measure                             5028 ns         5028 ns       100000
+old_sol_stateful_function_object_measure                     66.2 ns         66.2 ns     10087674
+old_sol_base_derived_measure                           ERROR OCCURRED: 'unsupported'
+old_sol_return_userdata_measure                              7272 ns         7270 ns        75231
+old_sol_optional_success_measure                              509 ns          509 ns      1366300
+old_sol_optional_half_failure_measure                         389 ns          389 ns      1806676
+old_sol_optional_failure_measure                             93.4 ns         93.4 ns      7433880
+old_sol_implicit_inheritance_measure                   ERROR OCCURRED: 'unsupported'
+sol2_table_global_string_get_measure                         22.1 ns         22.1 ns     38410359
+sol2_table_global_string_set_measure                         18.9 ns         18.9 ns     30364881
+sol2_table_get_measure                                       27.6 ns         27.6 ns     25552164
+sol2_table_set_measure                                       26.2 ns         26.2 ns     26822658
+sol2_table_chained_get_measure                               46.0 ns         46.0 ns     14485556
+sol2_table_chained_set_measure                               56.1 ns         56.0 ns     12467199
+sol2_c_function_measure                                      2746 ns         2745 ns       255400
+sol2_c_function_through_lua_in_c_measure                     43.0 ns         43.0 ns     16191865
+sol2_lua_function_in_c_measure                               37.7 ns         37.7 ns     18436526
+sol2_member_function_call_measure                            7970 ns         7970 ns        86756
+sol2_userdata_variable_access_measure                       10670 ns        10670 ns        65492
+sol2_userdata_variable_access_large_measure                711052 ns       710916 ns          984
+sol2_userdata_variable_access_last_measure                  11086 ns        11086 ns        62783
+sol2_multi_return_lua_measure                                3586 ns         3586 ns       205479
+sol2_multi_return_measure                                    50.4 ns         50.4 ns     11517789
+sol2_stateful_function_object_measure                        44.1 ns         44.1 ns     15807279
+sol2_base_derived_measure                                     172 ns          172 ns      4551935
+sol2_return_userdata_measure                                10324 ns        10324 ns        62387
+sol2_optional_success_measure                                60.1 ns         60.1 ns     11524002
+sol2_optional_half_failure_measure                           57.1 ns         57.1 ns     13057949
+sol2_optional_failure_measure                                26.8 ns         26.8 ns     25759892
+sol2_implicit_inheritance_measure                           28939 ns        28939 ns        24963
+sol3_table_global_string_get_measure                         19.1 ns         19.1 ns     36842436
+sol3_table_global_string_set_measure                         23.8 ns         23.8 ns     38003497
+sol3_table_get_measure                                       30.4 ns         30.4 ns     20641308
+sol3_table_set_measure                                       30.1 ns         30.1 ns     23297867
+sol3_table_chained_get_measure                               52.2 ns         52.2 ns     13339365
+sol3_table_chained_set_measure                               55.4 ns         55.4 ns     13249833
+sol3_c_function_measure                                      2941 ns         2941 ns       241977
+sol3_c_function_through_lua_in_c_measure                     47.3 ns         47.3 ns     14806753
+sol3_lua_function_in_c_measure                               37.9 ns         37.9 ns     18419856
+sol3_member_function_call_measure                            6762 ns         6762 ns        99527
+sol3_userdata_variable_access_measure                       10096 ns        10094 ns        68601
+sol3_userdata_variable_access_large_measure                584891 ns       584891 ns         1196
+sol3_userdata_variable_access_last_measure                  10776 ns        10776 ns        65283
+sol3_multi_return_lua_measure                                3745 ns         3745 ns       184048
+sol3_multi_return_measure                                    56.7 ns         56.7 ns     12336423
+sol3_stateful_function_object_measure                        45.8 ns         45.8 ns     15272820
+sol3_base_derived_measure                                     113 ns          113 ns      6273642
+sol3_return_userdata_measure                                10452 ns        10450 ns        64325
+sol3_optional_success_measure                                55.9 ns         55.9 ns     11386424
+sol3_optional_half_failure_measure                           53.8 ns         53.8 ns     10000000
+sol3_optional_failure_measure                                24.7 ns         24.7 ns     28169937
+sol3_implicit_inheritance_measure                           18017 ns        18017 ns        42915
