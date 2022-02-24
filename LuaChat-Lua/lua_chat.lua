@@ -9,6 +9,12 @@
  Licensed under the MIT license. See LICENSE file in the project.
  Feedback: james@james-pascoe.com
 
+ Install and run:
+
+ 1. Install Lua 5.4 from lua.org
+ 2. sudo luarocks install luaposix luasocket
+ 3. lua lua_chat <host> <port> on both
+
 ]]
 
 local socket = require("socket")
@@ -32,55 +38,39 @@ function sender (host, port)
 
 end
 
-function receiver (host, port)
+function receiver (port)
 
-  local server = assert(socket.bind("*", 0))
+  local server = assert(socket.bind("*", port))
   server:settimeout(0.1)
 
   while true do
 
-local ip, port = server:getsockname()
-print("Waiting for connection on " .. ip .. " port " .. port);
+    local _, port = server:getsockname()
+    print("Waiting for connection on port " .. port);
 
-local err
-client, err = server:accept()
-if (not client and err == "timeout") then
-  coroutine.yield()
-else
-  client:send("Welcome to LuaChat !\n")
-  client:settimeout(0.1)
-
-  local err = ""
-  while err ~= "closed" do
-    local line
-    line, err = client:receive()
-
-    if not err then
-      print("Received: " .. line)
+    local err
+    client, err = server:accept()
+    if (not client and err == "timeout") then
+      coroutine.yield()
     else
-      coroutine.yield()
+      local peer_ip, peer_port = client:getpeername()
+
+      client:send("Connected to LuaChat !\n")
+      client:settimeout(0.1)
+
+      while err ~= "closed" do
+        local line
+        line, err = client:receive()
+
+        if not err then
+          print(
+            string.format("%s:%d> %s", peer_ip, peer_port, line)
+          )
+        else
+          coroutine.yield()
+        end
+      end
     end
-  end
-end
-
-
-
-    -- Yield until a message arrives, at which point, print it
-    --[[
-    repeat
-      coroutine.yield()
-    until talk:IsMessageAvailable()
-
-    message = talk:GetNextMessage()
-
-    Actions.Log.info(
-      string.format(
-        "Received from %s:%s %s", host, port, message
-      )
-    )
-
-    print(host .. ":" .. tostring(port) .. "> " .. message)
-]]
 
   end
 
@@ -112,41 +102,28 @@ function dispatcher (coroutines)
   end
 end
 
-print("Welcome to Lua Chat !")
+print("Welcome to Lua Chat !\n")
 
---[[
-if (#arg) then
-  print("Arguments passed to Lua:")
-  for k,v in pairs(args) do
-    print(string.format("  %s %s", tostring(k), tostring(v)))
-  end
+if (#arg ~= 3) then
+  print("Usage: lua lua_chat.lua <local port> <remote IP> <remote port>")
+  os.exit(1)
 end
 
--- Validate and process the command-line arguments. The 'host' parameter
--- specifies the host to connect to (and is mandatory). If the user wishes
--- to run two instances of LuaChat on the same machine (e.g. for testing)
--- then check that the 'port' and 'server_port' arguments are also present.
-if (not args or not args["host"]) then
-  print("destination hostname (or IP) must be specified " ..
-        "e.g. -a host=192.168.1.1")
-end
-
-if (args["host"] == "localhost" or args["host"] == "127.0.0.1") then
-  if (not args["port"] or not args["server_port"]) then
-    print("destination port and server port must be provided " ..
-          "when running multiple instances of LuaChat on the " ..
-          "same host e.g. -a port=7777 -a server_port=8888")
-  end
-end
---]]
+local port, remote_ip, remote_port = tonumber(arg[1]), arg[2], tonumber(arg[3])
+print(
+  string.format("Starting LuaChat:\n" ..
+                "  local port: %d\n" ..
+                "  remote IP: %s\n" ..
+                "  remote port: %d\n\n", port, remote_ip, remote_port)
+)
 
 -- Create co-routines
 local coroutines = {}
 coroutines["receiver"] = coroutine.create(receiver)
-coroutine.resume(coroutines["receiver"], "localhost", 6666)
+coroutine.resume(coroutines["receiver"], port)
 
 coroutines["sender"] = coroutine.create(sender)
-coroutine.resume(coroutines["sender"], "localhost", 7777)
+coroutine.resume(coroutines["sender"], remote_ip, remote_port)
 
 -- Run the main loop
 dispatcher(coroutines)
