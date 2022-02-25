@@ -12,8 +12,9 @@
  Install and run:
 
  1. Install Lua 5.4 from lua.org
- 2. sudo luarocks install luaposix luasocket
- 3. lua lua_chat <host> <port> on both
+ 2. sudo luarocks install luaposix
+ 3. sudo luarocks install luasocket
+ 3. lua lua_chat <local port> <remote host> <remote port> on both
 
 ]]
 
@@ -22,13 +23,22 @@ local client = nil
 
 function sender (host, port)
 
+  local remote = socket.connect(host, port)
+  while not remote do
+    coroutine.yield()
+
+    remote = socket.connect(host, port)
+  end
+
+  print("Connected to " .. host .. ":" .. port)
+
   while true do
 
     local ret = require "posix".rpoll(0, 1000)
     if (ret == 1) then
       local message = io.read()
-      if (message ~= "" and client) then
-        client:send(message .. "\n")
+      if (message ~= "") then
+        remote:send(message .. "\n")
       end
     end
 
@@ -48,8 +58,7 @@ function receiver (port)
     local _, port = server:getsockname()
     print("Waiting for connection on port " .. port);
 
-    local err
-    client, err = server:accept()
+    local client, err = server:accept()
     if (not client and err == "timeout") then
       coroutine.yield()
     else
@@ -60,7 +69,7 @@ function receiver (port)
 
       while err ~= "closed" do
         local line
-        line, err = client:receive()
+        line, err = client:receive("*l")
 
         if not err then
           print(
