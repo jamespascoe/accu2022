@@ -23,26 +23,32 @@ local client = nil
 
 function sender (host, port)
 
-  local remote = socket.connect(host, port)
-  while not remote do
-    coroutine.yield()
-
-    remote = socket.connect(host, port)
-  end
-
-  print("Connected to " .. host .. ":" .. port)
-
   while true do
 
-    local ret = require "posix".rpoll(0, 1000)
-    if (ret == 1) then
-      local message = io.read()
-      if (message ~= "") then
-        remote:send(message .. "\n")
-      end
+    local remote, err = socket.connect(host, port)
+    while not remote do
+      coroutine.yield()
+
+      remote, err = socket.connect(host, port)
     end
 
-    coroutine.yield()
+    print("Connected to " .. host .. ":" .. port)
+
+    while err ~= "closed" do
+
+      local ret = require "posix".rpoll(0, 1000)
+      if (ret == 1) then
+        local message = io.read()
+        if (message ~= "") then
+          _, err = remote:send(message .. "\n")
+        end
+      else
+        _, err = remote:send("\0")
+      end
+
+      coroutine.yield()
+
+    end
 
   end
 
