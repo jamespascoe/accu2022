@@ -10,7 +10,7 @@
 
  Install and run:
 
- 1. Install Lua 5.4 from lua.org
+ 1. Install Lua 5.4.4 from lua.org
  2. sudo luarocks install luaposix
  3. sudo luarocks install luasocket
  4. Run: lua lua_chat <local port> <remote host> <remote port> on both. E.g.:
@@ -112,8 +112,6 @@ function dispatcher (coroutines)
         end
 
         coroutines[name] = nil
-
-        break
       end
     end
 
