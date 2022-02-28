@@ -5,7 +5,6 @@
  This behaviour allows users to 'chat' over a TCP connection in a manner
  similar to the UNIX 'talk' program.
 
- Copyright © Blu Wireless. All Rights Reserved.
  Licensed under the MIT license. See LICENSE file in the project.
  Feedback: james@james-pascoe.com
 
@@ -14,13 +13,15 @@
  1. Install Lua 5.4 from lua.org
  2. sudo luarocks install luaposix
  3. sudo luarocks install luasocket
- 3. lua lua_chat <local port> <remote host> <remote port> on both
+ 4. Run: lua lua_chat <local port> <remote host> <remote port> on both. E.g.:
 
+      lua lua_chat.lua 6666 127.0.0.1 7777 (in one window)
+      lua lua_chat.lua 7777 127.0.0.1 6666 (in another window)
 ]]
 
 local socket = require("socket")
-local client = nil
 
+-- Connect to the peer and send messages read from stdin
 function sender (host, port)
 
   while true do
@@ -35,29 +36,29 @@ function sender (host, port)
     print("Connected to " .. host .. ":" .. port)
 
     while err ~= "closed" do
-
+      -- Read from stdin (non-blocking - 1s timeout)
       local ret = require "posix".rpoll(0, 1000)
       if (ret == 1) then
         local message = io.read()
         if (message ~= "") then
           _, err = remote:send(message .. "\n")
         end
-      else
+      else -- read timeout: update connection status
         _, err = remote:send("\0")
       end
 
       coroutine.yield()
-
     end
 
   end
 
 end
 
+-- Receive messages from our peer and print them
 function receiver (port)
 
   local server = assert(socket.bind("*", port))
-  server:settimeout(0.1)
+  server:settimeout(0.1) -- set non-blocking (100 ms timeout)
 
   while true do
 
@@ -70,7 +71,7 @@ function receiver (port)
     else
       local peer_ip, peer_port = client:getpeername()
 
-      client:send("Connected to LuaChat !\n")
+      client:send("Connected to LuaChat!\n")
       client:settimeout(0.1)
 
       while err ~= "closed" do
@@ -95,18 +96,19 @@ end
 function dispatcher (coroutines)
 
   while true do
-    if next(coroutines) == nil then break end -- no more coroutines to run
+
+    if next(coroutines) == nil then break end -- no more coroutines
 
     for name, co in pairs(coroutines) do
       local status, res = coroutine.resume(co)
 
       if res then -- coroutine has returned a result (i.e. finished)
 
-        if type(res) == "string" then  -- runtime error
-          print("Lua coroutine '" .. tostring(name) ..
-                "' has exited with runtime error " .. res)
+        if type(res) == "string" then -- runtime error
+          print("Lua coroutine '" .. name ..
+                "' has exited with error: " .. res)
         else
-          print("Lua coroutine '" .. tostring(name) .. "' exited")
+          print("Lua coroutine '" .. name .. "' exited")
         end
 
         coroutines[name] = nil
@@ -114,7 +116,9 @@ function dispatcher (coroutines)
         break
       end
     end
+
   end
+
 end
 
 print("Welcome to Lua Chat !\n")
