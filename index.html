@@ -99,26 +99,36 @@
           </ul>
         </section>
 
-        <!-- TODO: Code build / run / test instructions -->
+        <!-- TODO: Code build / run / test instructions
+        <section>
+          <video data-autoplay src="media/terminal-window.mp4"></video>
+        </section>
+        -->
 
         <!--    <pre class="stretch"><code class="c++" style="width:100%" data-trim data-line-numbers="|20|22|24-38|"> -->
         <section>
           <h2><a href="http://www.lua.org/manual/5.4/manual.html#4">Blocking Echo Server</a></h2>
-            <pre class="stretch"><code class="c++" style="width:102%" data-trim data-line-numbers="|15|17|19-33|">
+            <pre class="stretch"><code class="c++" style="width:102%" data-trim data-line-numbers="|21|23|25-40|">
+//
+// echo_server_blocking.cpp
+// ------------------------
+//
+// g++-11 -I/usr/local/boost_1_78_0/include -Wall -Werror
+// echo_server_blocking.cpp -o blocking -l pthread
+//
+
 #include &ltboost/asio.hpp&gt
 #include &ltiostream&gt
 
-using boost::asio::io_context;
 using boost::asio::buffer;
-using boost::system::error_code;
+using boost::asio::io_context;
 using boost::asio::ip::tcp;
+using boost::system::error_code;
 
 static const int buf_len = 1000;
 
-int main()
-{
-  try
-  {
+int main() {
+  try {
     io_context ctx;
 
     tcp::acceptor acceptor(ctx, tcp::endpoint(tcp::v4(), 6666));
@@ -131,16 +141,15 @@ int main()
 
       for (;;) {
         error_code error;
-        std::size_t len = peer_socket.read_some(buffer(buf), error);
+        std::size_t len =
+            peer_socket.read_some(buffer(buf), error);
         if (error == boost::asio::error::eof)
           break;
 
         write(peer_socket, buffer(buf, len));
       }
     }
-  }
-  catch (std::exception& e)
-  {
+  } catch (std::exception &e) {
     std::cerr &lt&lt "Exception: " &lt&lt e.what() &lt&lt "\n";
   }
 }
@@ -149,8 +158,17 @@ int main()
 
         <section>
           <h2><a href="http://www.lua.org/manual/5.4/manual.html#4">Asynchronous Echo Server</a></h2>
-            <pre class="stretch"><code class="c++" style="width:102%" data-trim data-line-numbers="">
+            <pre class="stretch"><code class="c++" style="width:102%" data-trim data-line-numbers="|89-105|96-98|101|72-87|47-70|31-45|">
+//
+// echo_server_async.cpp
+// ---------------------
+//
+// g++-11 -I/usr/local/boost_1_78_0/include -fcoroutines -std=c++20
+// -Wall -Werror echo_server_async.cpp -o async -l pthread
+//
+
 #include &ltboost/asio.hpp&gt
+
 #include &ltiostream&gt
 
 using boost::asio::buffer;
@@ -249,6 +267,68 @@ int main() {
           </code></pre>
         </section>
 
+        <section>
+          <h2><a href="http://www.lua.org/manual/5.4/manual.html#4">Coroutine Echo Server</a></h2>
+            <pre class="stretch"><code class="c++" style="width:102%" data-trim data-line-numbers="|43-57|50-51|53|22-41|27|30-31|35-36|">
+//
+// echo_server_coroutine.cpp
+// -------------------------
+//
+// g++-11 -I/usr/local/boost_1_78_0/include -fcoroutines -std=c++20
+// -Wall -Werror echo_server_coroutine.cpp -o coroutine -l pthread
+//
+
+#include &ltboost/asio.hpp&gt
+#include &ltboost/asio/experimental/as_tuple.hpp&gt
+
+#include &ltiostream&gt
+
+using boost::asio::buffer;
+using boost::asio::detached;
+using boost::asio::io_context;
+using boost::asio::use_awaitable;
+using boost::asio::experimental::as_tuple;
+using boost::asio::ip::tcp;
+using boost::system::error_code;
+
+boost::asio::awaitable&ltvoid&gt echo(tcp::socket peer_socket,
+                                  tcp::acceptor acceptor) {
+  std::array&ltchar, 1000&gt buf;
+
+  for (;;) {
+    co_await acceptor.async_accept(peer_socket, use_awaitable);
+
+    for (;;) {
+      auto [error, len] = co_await peer_socket.async_read_some(
+          buffer(buf), as_tuple(use_awaitable));
+      if (error == boost::asio::error::eof)
+        break;
+
+      co_await async_write(peer_socket, buffer(buf, len),
+                           use_awaitable);
+    }
+
+    peer_socket.close();
+  }
+}
+
+int main() {
+  try {
+    io_context ctx;
+
+    tcp::socket socket(ctx);
+    tcp::acceptor acceptor(ctx, tcp::endpoint(tcp::v4(), 6666));
+
+    co_spawn(ctx, echo(std::move(socket), std::move(acceptor)),
+             detached);
+
+    ctx.run();
+  } catch (std::exception &e) {
+    std::cerr &lt&lt "Exception: " &lt&lt e.what() &lt&lt std::endl;
+  }
+}
+          </code></pre>
+        </section>
 
         <section>
           <h2><a href="https://github.com/bluwireless/LuaChat/blob/master/behaviours/lua_chat.lua">LuaChat Behaviour</a></h2>
