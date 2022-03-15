@@ -105,7 +105,6 @@
         </section>
         -->
 
-        <!--    <pre class="stretch"><code class="c++" style="width:100%" data-trim data-line-numbers="|20|22|24-38|"> -->
         <section>
           <h2><a href="http://www.lua.org/manual/5.4/manual.html#4">Blocking Echo Server</a></h2>
             <pre class="stretch"><code class="c++" style="width:102%" data-trim data-line-numbers="|21|23|25-40|">
@@ -328,6 +327,33 @@ int main() {
   }
 }
           </code></pre>
+        </section>
+
+      </section>
+      <section>
+
+        <section data-background-video="media/BWT_Intermission.mp4" data-background-video-loop=true>
+          <h1>Coroutine Tutorial</h1>
+        </section>
+
+        <section data-menu-title="Learn About Coroutines">
+          <h2>How Do We Learn About Coroutines?</h2>
+            <ul>
+              <span class="fragment"><li>Goal: implement a 'chat' program using coroutines</li></span>
+              <span class="fragment"><li>Prototype in <a href="https://www.lua.org/pil/9.1.html">Lua 5.4.4</a></li></span>
+              <span class="fragment"><li><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/n4775.pdf">C++20</a> coroutines:</li></span>
+              <ul>
+                <span class="fragment">
+                  <li>
+                    <a href="https://en.cppreference.com/w/cpp/language/coroutines#co_await">co_await</a>,
+                    <a href="https://en.cppreference.com/w/cpp/language/coroutines#co_yield">co_yield</a> and
+                    <a href="https://en.cppreference.com/w/cpp/language/coroutines#co_return">co_return</a>
+                  </li>
+                </span>
+                <span class="fragment"><li>Return objects, promises and awaitables</li></span>
+              </ul>
+              <span class="fragment"><li>Implement in C++ (using <a href="https://www.boost.org/doc/libs/1_78_0/doc/html/boost_asio.html">Boost Asio 1.78</a>)</li></span>
+            </ul>
         </section>
 
         <section>
