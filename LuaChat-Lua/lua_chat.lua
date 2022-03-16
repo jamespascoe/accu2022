@@ -122,11 +122,15 @@ end
 print("Welcome to Lua Chat !\n")
 
 if (#arg ~= 3) then
-  print("Usage: lua lua_chat.lua <local port> <remote IP> <remote port>")
+  print("Usage: lua lua_chat.lua " ..
+        "<local port> <remote IP> <remote port>")
   os.exit(1)
 end
 
-local port, remote_ip, remote_port = tonumber(arg[1]), arg[2], tonumber(arg[3])
+local port, remote_ip, remote_port = tonumber(arg[1]),
+                                     arg[2],
+                                     tonumber(arg[3])
+
 print(
   string.format("Starting LuaChat:\n" ..
                 "  local port: %d\n" ..

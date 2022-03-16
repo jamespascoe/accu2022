@@ -350,14 +350,26 @@ int main() {
                     <a href="https://en.cppreference.com/w/cpp/language/coroutines#co_return">co_return</a>
                   </li>
                 </span>
-                <span class="fragment"><li>Return objects, promises and awaitables</li></span>
+                <span class="fragment"><li>Return objects, promises, awaitables and traits</li></span>
               </ul>
-              <span class="fragment"><li>Implement in C++ (using <a href="https://www.boost.org/doc/libs/1_78_0/doc/html/boost_asio.html">Boost Asio 1.78</a>)</li></span>
+              <span class="fragment"><li>Implement 'chat' in C++ (using <a href="https://www.boost.org/doc/libs/1_78_0/doc/html/boost_asio.html">Boost Asio 1.78</a>)</li></span>
             </ul>
         </section>
 
         <section>
-          <h2><a href="https://github.com/bluwireless/LuaChat/blob/master/behaviours/lua_chat.lua">LuaChat Behaviour</a></h2>
+          <h2><a href="http://lua.org">Lua</a></h2>
+          <ul>
+            <span class="fragment"><li>Lightweight embeddable scripting language</li></span>
+            <span class="fragment"><li>Good way of building a mental model of coroutines</li></span>
+            <span class="fragment"><li>Single threaded so lock-free, no races etc.</li></span>
+            <span class="fragment"><li>Implement your own dispatcher in Lua</li></span>
+            <span class="fragment"><li><a href="https://www.lua.org/pil/9.1.html">Lua coroutines</a> are stackful</li></span>
+            <span class="fragment"><li><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/n4775.pdf">C++20 coroutines</a> are stackless</li></span>
+          </ul>
+        </section>
+
+        <section>
+          <h2><a href="https://github.com/bluwireless/LuaChat/blob/master/behaviours/lua_chat.lua">LuaChat</a></h2>
             <ul>
               <span class="fragment"><li>Sender coroutine: sends user input to peer</li></span>
               <span class="fragment"><li>Receiver coroutine: prints received messages</li></span>
@@ -365,6 +377,12 @@ int main() {
               <span class="fragment"><li>main: processes arguments and creates coroutines</li></span>
             </ul>
         </section>
+
+        <!-- TODO: Code build / run / test instructions
+        <section>
+          <video data-autoplay src="media/terminal-luachat.mp4"></video>
+        </section>
+        -->
 
         <section>
             <h2>Sender Coroutine</h2>
