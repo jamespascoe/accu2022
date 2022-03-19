@@ -336,8 +336,42 @@ int main() {
           <h1>Coroutine Tutorial</h1>
         </section>
 
-        <section data-menu-title="Learn About Coroutines">
-          <h2>How Do We Learn About Coroutines?</h2>
+        <section data-menu-title="Coroutines in C++20">
+          <h2><a href="https://en.cppreference.com/w/cpp/language/coroutines">Coroutine Support in C++20</a></h2>
+            <ul>
+              <span class="fragment"><li>Three new keywords: <a href="https://en.cppreference.com/w/cpp/language/coroutines#co_await">co_await</a>, <a href="https://en.cppreference.com/w/cpp/language/coroutines#co_yield">co_yield</a>, <a href="https://en.cppreference.com/w/cpp/language/coroutines#co_return">co_return</a></li></span>
+              <span class="fragment"><li>New types:</li></span>
+              <ul>
+                <span class="fragment"><li><a href="https://en.cppreference.com/w/cpp/coroutine/coroutine_handle"><code>coroutine_handle&ltP&gt</code></a></li></span>
+                <span class="fragment"><li><a href="https://en.cppreference.com/w/cpp/coroutine/coroutine_traits"><code>coroutine_traits&ltTs...&gt</code></a></li></span>
+              </ul>
+              <span class="fragment"><li>Trivial awaitables:</li></span>
+              <ul>
+                <span class="fragment"><li><a href="https://en.cppreference.com/w/cpp/coroutine/suspend_always"><code>std::suspend_always</code></a></li></span>
+                <span class="fragment"><li><a href="https://en.cppreference.com/w/cpp/coroutine/suspend_never"><code>std::suspend_never</code></a></li></span>
+              </ul>
+            </ul>
+        </section>
+
+        <section>
+          <h2>Tips for Learning</h2>
+            <ul>
+              <span class="fragment"><li>Principally for library development (not user-code)</li></span>
+              <span class="fragment"><li>Libraries with coroutine support:</li></span>
+              <ul>
+                <span class="fragment"><li>Boost Asio:</li>
+                  <ul>
+                    <li>(first in <a href="https://www.boost.org/doc/libs/1_67_0/doc/html/boost_asio/overview/core/coroutines_ts.html">1.67.0</a>, 'C++20 Support' in <a href="https://www.boost.org/doc/libs/1_77_0/doc/html/boost_asio/overview/core/cpp20_coroutines.html">1.77.0</a>)</li>
+                  </ul>
+                </span>
+                <span class="fragment"><li>Lewis Baker's <a href="https://github.com/lewissbaker/cppcoro">cppcoro</a></li></span>
+              </ul>
+              <span class="fragment"><li><span style="color:yellow">References to 'promise' and 'future' are not <code>std::promise</code> and <code>std::future</code>!</span></li></span>
+            </ul>
+        </section>
+
+        <section>
+          <h2>Tutorial Strategy</h2>
             <ul>
               <span class="fragment"><li>Goal: implement a 'chat' program using coroutines</li></span>
               <span class="fragment"><li>Prototype in <a href="https://www.lua.org/pil/9.1.html">Lua 5.4.4</a></li></span>
@@ -463,19 +497,16 @@ end
 
           <section>
             <h2><a href="https://www.lua.org/pil/9.4.html">Dispatcher</a></h2>
-            <pre class="stretch"><code class="lua" data-trim data-line-numbers="">
--- Coroutine dispatcher (see Section 9.4 of 'Programming in Lua')
+            <pre class="stretch"><code class="lua" style="width:102%" data-trim data-line-numbers="">
 function dispatcher (coroutines)
 
   while true do
-
     if next(coroutines) == nil then break end -- no more coroutines
 
     for name, co in pairs(coroutines) do
       local status, res = coroutine.resume(co)
 
       if res then -- coroutine has returned a result (i.e. finished)
-
         if type(res) == "string" then -- runtime error
           print("Lua coroutine '" .. name ..
                 "' has exited with error: " .. res)
@@ -490,11 +521,57 @@ function dispatcher (coroutines)
 end
             </code></pre>
           </section>
+
+          <section>
+            <h2>Main Code</h2>
+            <pre class="stretch"><code class="lua" style="width:102%" data-trim data-line-numbers="">
+local port, remote_ip, remote_port = tonumber(arg[1]),
+                                     arg[2],
+                                     tonumber(arg[3])
+
+print(
+  string.format("Starting LuaChat:\n" ..
+                "  local port: %d\n" ..
+                "  remote IP: %s\n" ..
+                "  remote port: %d\n\n", port, remote_ip, remote_port)
+)
+
+-- Create co-routines
+local coroutines = {}
+coroutines["receiver"] = coroutine.create(receiver)
+coroutine.resume(coroutines["receiver"], port)
+
+coroutines["sender"] = coroutine.create(sender)
+coroutine.resume(coroutines["sender"], remote_ip, remote_port)
+
+-- Run the main loop
+dispatcher(coroutines)
+            </code></pre>
+          </section>
+
+        </section>
+        <section>
+
+          <section data-background-video="media/BWT_Intermission.mp4" data-background-video-loop=true>
+            <h1>C++20 Coroutines</h1>
+          </section>
+
+        <section>
+          <h2><a href="https://en.cppreference.com/w/cpp/language/coroutines#co_await">The co_await Operator</a></h2>
+          <ul>
+            <span class="fragment"><li>Suspends a coroutine for later resumption</li></span>
+            <span class="fragment"><li>E.g. while waiting for an event or a computation</li></span>
+            <span class="fragment"><li>Called on an <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/n4775.pdf">await-expression</a></li></span>
+            <span class="fragment"><li>A type that supports co_await is an <a href="https://lewissbaker.github.io/2017/11/17/understanding-operator-co-await">Awaitable</a> type</li></span>
+            <span class="fragment"><li></li></span>
+          </ul>
         </section>
 
 
 
 
+
+        </section>
 
 
 
