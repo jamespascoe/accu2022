@@ -36,7 +36,7 @@
               <a href="mailto:james@james-pascoe.com">james@james-pascoe.com</a><p>
 
               <a href="http://jamespascoe.github.io/accu2022">http://jamespascoe.github.io/accu2022</a><br>
-              <a href="https://github.com/jamespascoe/cochat.git">https://github.com/jamespascoe/cochat.git</a>
+              <a href="https://github.com/jamespascoe/accu2022-example-code.git">https://github.com/jamespascoe/accu2022-example-code.git</a>
             </small>
         </section>
         <section data-menu-title="Poll: Coroutine Familiarity">
@@ -371,7 +371,7 @@ int main() {
         </section>
 
         <section>
-          <h2>Tutorial Strategy</h2>
+          <h2>Tutorial Overview</h2>
             <ul>
               <span class="fragment"><li>Goal: implement a 'chat' program using coroutines</li></span>
               <span class="fragment"><li>Prototype in <a href="https://www.lua.org/pil/9.1.html">Lua 5.4.4</a></li></span>
@@ -414,7 +414,7 @@ int main() {
 
         <!-- TODO: Code build / run / test instructions
         <section>
-          <video data-autoplay src="media/terminal-luachat.mp4"></video>
+          <video data-autoplay src="media/terminal-test.mov"></video>
         </section>
         -->
 
@@ -557,28 +557,90 @@ dispatcher(coroutines)
           </section>
 
         <section>
-          <h2><a href="https://en.cppreference.com/w/cpp/language/coroutines#co_await">The co_await Operator</a></h2>
+          <h2><code><a href="https://en.cppreference.com/w/cpp/language/coroutines#co_await">co_await</a></code></h2>
           <ul>
-            <span class="fragment"><li>Suspends a coroutine for later resumption</li></span>
-            <span class="fragment"><li>E.g. while waiting for an event or a computation</li></span>
-            <span class="fragment"><li>Called on an <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/n4775.pdf">await-expression</a></li></span>
-            <span class="fragment"><li>A type that supports co_await is an <a href="https://lewissbaker.github.io/2017/11/17/understanding-operator-co-await">Awaitable</a> type</li></span>
+            <span class="fragment"><li>Suspends a coroutine and returns to the caller</li></span>
+            <span class="fragment"><li>... e.g. while waiting for an event or a computation</li></span>
+            <span class="fragment"><li>Called on an <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/n4775.pdf">await-expression</a>:</li></span>
+            <span class="fragment"><ul><li><code>co_await async_write(...);</code></li></ul></span>
+            <span class="fragment"><li>A type that supports <code>co_await</code> is an <a href="https://lewissbaker.github.io/2017/11/17/understanding-operator-co-await">Awaitable</a> type</li></span>
+            <span class="fragment" style="color:yellow"><li>Not neccesarily the same as the <a href="">Awaiter</a> type</li></span>
+            <span class="fragment" style="color:yellow"><li>... which controls the semantics of <code>co_await</code></li></span>
           </ul>
         </section>
 
+        <section>
+          <h2>Fundamentals</h2>
+          <ul>
+            <span class="fragment"><li><a href="https://lewissbaker.github.io/2017/11/17/understanding-operator-co-await">awaitable type</a>: supports the <code>co_await</code> operator</li></span>
+            <span class="fragment"><ul><li>Controls the semantics of an <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/n4775.pdf">await-expression</a></li></ul></span>
+            <span class="fragment"><ul><li>Informs the compiler how to obtain the <a href="https://lewissbaker.github.io/2017/11/17/understanding-operator-co-await">awaiter</a></li></ul></span>
+          </ul>
 
-
-
+          <span class="fragment"><pre><code class="c++" data-trim data-line-numbers="">
+co_await async_write(..., use_awaitable);
+          </span></code></pre>
 
         </section>
 
+        <section>
+          <h2>Fundamentals</h2>
+          <ul>
+            <span class="fragment"><li><a href="https://lewissbaker.github.io/2017/11/17/understanding-operator-co-await">awaiter type</a>: defines suspend and resume behaviour</li></span>
+            <span class="fragment"><ul><li><code><a href="https://lewissbaker.github.io/2017/11/17/understanding-operator-co-await">await_ready</a></code>: is suspend required?</li></ul></span>
+            <span class="fragment"><ul><li><code><a href="https://lewissbaker.github.io/2017/11/17/understanding-operator-co-await">await_suspend</a></code>: schedule resume</li></ul></span>
+            <span class="fragment"><ul><li><code><a href="https://lewissbaker.github.io/2017/11/17/understanding-operator-co-await">await_resume</a></code>: <code>co_await</code> return result</li></ul><p></span>
+            <span class="fragment"><li>Can be the same as the <a href="https://lewissbaker.github.io/2017/11/17/understanding-operator-co-await">awaitable type</a></li></span>
+            <span class="fragment"><ul><li>... though not neccesarily</li></ul></span>
+          </ul>
+        </section>
+
+        <!--
+
+Terminology
+
+awaitable type - supports the co_await operator
+ - controls the semantics of a co_await expression (await-expression)
+
+awaiter type - defines the coroutine's suspend/resume semantics
+ - implements: await_ready, await_suspend, await_resume
+ - not neccesarily the same as the awaitable type (though they can be)
+
+coroutine_handle - points to a coroutine frame on the heap
+ - coroutine frames contain the volatile state of the coroutine
+ - not an RAII type must be destroyed explicitly
+ - heap allocations can be avoided if stack nesting can be preserved
+
+promise type - customises the coroutine's behaviour and tracks its state
+ - the coroutine provides its result or exception through an object of this type
+ - not to be confused with std::promise
+
+coroutine return type -
+ - examples are 'task<T>' or 'generator<T>' (cppcoro is a good place)
+ - declares the promise type to the compiler (looked up via coroutine_traits)
+ - interfaces to higher-level abstractions e.g. adding range support to generators
+ - sometimes referred to as a future (again - not to be confused with std::future)
 
 
 
+Examples:
+
+co_await
+
+card_dealer (generator)
 
 
+Key references:
+
+- Lewis Baker's blog posts
+  - cppcoro
+- Dave Maziere's blog post
+- Gor Nishanov's - N4775
+- cppreference.com
+        -->
 
 
+        </section>
 
 
 
