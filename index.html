@@ -333,7 +333,7 @@ int main() {
       <section>
 
         <section data-background-video="media/BWT_Intermission.mp4" data-background-video-loop=true>
-          <h1>Coroutine Tutorial</h1>
+          <h1>C++20 Coroutines</h1>
         </section>
 
         <section data-menu-title="Coroutines in C++20">
@@ -552,9 +552,9 @@ dispatcher(coroutines)
         </section>
         <section>
 
-          <section data-background-video="media/BWT_Intermission.mp4" data-background-video-loop=true>
-            <h1>C++20 Coroutines</h1>
-          </section>
+        <section data-background-video="media/BWT_Intermission.mp4" data-background-video-loop=true>
+          <h1>Supporting Types</h1>
+        </section>
 
         <section>
           <h2><a href="https://lewissbaker.github.io/2017/11/17/understanding-operator-co-await">Awaitable Type</a></h2>
@@ -598,52 +598,121 @@ co_await async_write(..., use_awaitable);
           <h2><a href="https://lewissbaker.github.io/2018/09/05/understanding-the-promise-type">Promise Type</a></h2>
           <ul>
             <span class="fragment"><li>Controls the coroutine's behaviour</li></span>
+            <span class="fragment"><ul><li>... example coming up</li></ul></span>
             <span class="fragment"><li>Implements methods that are called at specific points during the execution of the coroutine</li></span>
             <span class="fragment"><li>Conveys coroutine result (or exception)</li></span>
             <span class="fragment"><li>Again - not to be confused with <code>std::promise</code></li></span>
           </ul>
         </section>
 
-        <!--
-
-Terminology
-
-awaitable type - supports the co_await operator
- - controls the semantics of a co_await expression (await-expression)
-
-awaiter type - defines the coroutine's suspend/resume semantics
- - implements: await_ready, await_suspend, await_resume
- - not neccesarily the same as the awaitable type (though they can be)
-
-coroutine_handle - points to a coroutine frame on the heap
- - coroutine frames contain the volatile state of the coroutine
- - not an RAII type must be destroyed explicitly
- - heap allocations can be avoided if stack nesting can be preserved
-
-promise type - customises the coroutine's behaviour and tracks its state
- - the coroutine provides its result or exception through an object of this type
- - not to be confused with std::promise
-
-coroutine return type -
- - examples are 'task<T>' or 'generator<T>' (cppcoro is a good place)
- - declares the promise type to the compiler (looked up via coroutine_traits)
- - interfaces to higher-level abstractions e.g. adding range support to generators
- - sometimes referred to as a future (again - not to be confused with std::future)
-
         <section>
-          <h2><code><a href="https://en.cppreference.com/w/cpp/language/coroutines#co_await">co_await</a></code></h2>
+          <h2><a href=""><code>coroutine_handle</code></a></h2>
           <ul>
-            <span class="fragment"><li>Suspends a coroutine and returns to the caller</li></span>
-            <span class="fragment"><li>... e.g. while waiting for an event or a computation</li></span>
-            <span class="fragment"><li>Called on an <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/n4775.pdf">await-expression</a>:</li></span>
-            <span class="fragment"><ul><li><code>co_await async_write(...);</code></li></ul></span>
-            <span class="fragment"><li>A type that supports <code>co_await</code> is an <a href="https://lewissbaker.github.io/2017/11/17/understanding-operator-co-await">Awaitable</a> type</li></span>
-            <span class="fragment" style="color:yellow"><li>Not neccesarily the same as the <a href="">Awaiter</a> type</li></span>
-            <span class="fragment" style="color:yellow"><li>... which controls the semantics of <code>co_await</code></li></span>
+            <span class="fragment"><li>Points to a coroutine frame on the heap</li></span>
+            <span class="fragment"><ul><li>can be allocated on the stack</li></ul></span>
+            <span class="fragment"><li>Coroutine frames contain volatile state</li></span>
+            <span class="fragment"><ul><li>the address to resume at, local variables etc.</li></ul></span>
+            <span class="fragment"><li>Non-owning - has to be explicitly destroyed</li></span>
+            <span class="fragment"><ul><li>... typically through RAII</li></ul></span>
           </ul>
         </section>
 
+      </section>
+      <section>
 
+        <section data-background-video="media/BWT_Intermission.mp4" data-background-video-loop=true>
+          <h1>Example</h1>
+        </section>
+
+        <section>
+          <h2><a href="">Generator Example</a></h2>
+          <pre class="stretch"><code class="c++" data-trim data-line-numbers="|77-82|61-75|74|61|62-71|74|15|16-17|19-40|22-24|26-27|29-32|36-39|42-58|">
+//
+// card_dealer.cpp
+// ---------------
+//
+// g++-11 -fcoroutines -Wall -Werror card_dealer.cpp -o dealer
+//
+
+#include &ltcoroutine&gt
+#include &ltarray&gt
+#include &ltrandom&gt
+#include &ltstring&gt
+
+#include &ltiostream&gt
+
+template &lttypename T&gt struct generator {
+  struct promise_type;
+  using coroutine_handle = std::coroutine_handle&ltpromise_type&gt;
+
+  struct promise_type {
+    T current_value;
+
+    auto get_return_object() {
+      return generator{coroutine_handle::from_promise(*this)};
+    }
+
+    // Start 'lazily' i.e. suspend ('eagerly' == 'suspend_never').
+    auto initial_suspend() { return std::suspend_always{}; }
+
+    // Opportunity to publish results, signal completion etc.
+    // Suspend so that destroy() is called via RAII from outside
+    // the coroutine.
+    auto final_suspend() noexcept { return std::suspend_always{}; }
+
+    void unhandled_exception() { std::terminate(); }
+
+    auto yield_value(T const &value) {
+      current_value = value;
+      return std::suspend_always{};
+    }
+  };
+
+  bool next() {
+    return coroutine ? (coroutine.resume(), !coroutine.done())
+                     : false;
+  }
+
+  T value() const { return coroutine.promise().current_value; }
+
+  // Range support, class design etc.
+
+  ~generator() {
+    if (coroutine)
+      coroutine.destroy();
+  }
+
+private:
+  generator(coroutine_handle h) : coroutine(h) {}
+  coroutine_handle coroutine;
+};
+
+generator&ltstd::string&gt card_dealer(int deck_size) {
+  std::default_random_engine rng;
+  std::uniform_int_distribution&ltint&gt card(0, 12);
+  std::uniform_int_distribution&ltint&gt suit(0, 3);
+
+  std::array&ltstd::string, 13&gt cards = {
+      "Ace", "2", "3",  "4",    "5",     "6",   "7",
+      "8",   "9", "10", "Jack", "Queen", "King"};
+
+  std::array&ltstd::string, 4&gt suits = {"Clubs", "Diamonds",
+                                      "Spades", "Hearts"};
+
+  for (int i = 0; i &lt deck_size; i++)
+    co_yield(cards[card(rng)] + " of " + suits[suit(rng)]);
+}
+
+int main() {
+  generator&ltstd::string&gt dealer = card_dealer(100);
+
+  while (dealer.next())
+    std::cout &lt&lt dealer.value() &lt&lt std::endl;
+}
+        </code></pre>
+      </section>
+
+        <!--
 
 Examples:
 
