@@ -621,6 +621,19 @@ co_await async_write(..., use_awaitable);
         </section>
 
         <section>
+          <h2><a href="https://lewissbaker.github.io/2018/09/05/understanding-the-promise-type">Customising Co_Await</a></h2>
+          <ul>
+            <span class="fragment"><li>The <code>await_transform</code> method:</li></span>
+            <span class="fragment"><ul><li>Defined in the <code>promise_type</code></li></ul></span>
+            <span class="fragment"><ul><li>Enables types that are not awaitable</li></ul></span>
+            <span class="fragment"><ul><li>Disables <code>co_await</code> on certain types</li></ul></span>
+            <span class="fragment"><ul><li>Modify the behaviour of awaitable values</li></ul></span>
+            <span class="fragment"><li>Also possible to customise <code>co_yield</code></li></span>
+            <span class="fragment"><li>See Lewis Baker's Excellent <a href="https://lewissbaker.github.io/2018/09/05/understanding-the-promise-type">Blog Post</a> for details</li></span>
+          </ul>
+        </section>
+
+        <section>
           <h2><a href=""><code>coroutine_handle</code></a></h2>
           <ul>
             <span class="fragment"><li>Points to a coroutine frame on the heap</li></span>
@@ -632,15 +645,8 @@ co_await async_write(..., use_awaitable);
           </ul>
         </section>
 
-      </section>
-      <section>
-
-        <section data-background-video="media/BWT_Intermission.mp4" data-background-video-loop=true>
-          <h1>Example</h1>
-        </section>
-
         <section>
-          <h2><a href="">Generator Example</a></h2>
+          <h2><a href="https://github.com/jamespascoe/accu2022-example-code/tree/master/generator">Generator Example</a></h2>
           <pre class="stretch"><code class="c++" data-trim data-line-numbers="|77-82|61-75|74|61|62-71|74|15|16-17|19-40|22-24|26-27|29-32|36-39|42-58|">
 //
 // card_dealer.cpp
@@ -727,13 +733,310 @@ int main() {
         </code></pre>
       </section>
 
+      </section>
+      <section>
+
+        <section data-background-video="media/BWT_Intermission.mp4" data-background-video-loop=true>
+          <h1>Chat Example</h1>
+        </section>
+
+        <section>
+          <h2><a href="https://github.com/jamespascoe/accu2022-example-code.git">Coroutine Chat</a></h2>
+          <ul>
+            <span class="fragment"><li>Prototyped in Lua - implement in C++20</li></span>
+            <span class="fragment"><li>Retain coroutine design:</li></span>
+            <span class="fragment"><ul><li>Sender: reads keyboard and sends</li></ul></span>
+            <span class="fragment"><ul><li>Receiver: prints messages</li></ul></span>
+            <span class="fragment"><ul><li>Dispatcher: Boost IO context</li></ul></span>
+            <span class="fragment"><li>Must be non-blocking</li></span>
+            <span class="fragment"><li>Users should be able to reconnect</li></span>
+          </ul>
+        </section>
+
+        <section data-menu-title="Chat Screen Capture">
+          <h2><a href="https://github.com/jamespascoe/accu2022-example-code/blob/master/co_chat/co_chat.cpp">Build & Run</a></h2>
+          <video data-autoplay src="media/co_chat-terminal-capture.mov"></video>
+        </section>
+
+        <section>
+          <h2><a href="https://github.com/jamespascoe/accu2022-example-code/blob/master/co_chat/co_chat.cpp">Chat Class</a></h2>
+          <pre class="stretch"><code class="c++" data-trim data-line-numbers="|7-12|14-15|17|">
+class chat {
+
+public:
+  chat(char *addr, char *port, char *remote_addr,
+       char *remote_port) {
+
+    tcp::resolver resolver(ctx);
+    basic_resolver_entry<tcp> listen_endpoint;
+    basic_resolver_entry<tcp> remote_endpoint;
+
+    listen_endpoint = *resolver.resolve(addr, port, passive);
+    remote_endpoint = *resolver.resolve(remote_addr, remote_port);
+
+    co_spawn(ctx, sender(remote_endpoint), detached);
+    co_spawn(ctx, receiver(listen_endpoint), detached);
+
+    ctx.run();
+  }
+
+private:
+  awaitable<void> sender(tcp::endpoint remote) {
+    // ...
+  }
+
+  awaitable<void> receiver(tcp::endpoint listen) {
+    // ,,,
+  }
+
+  // Member variables (shared between coroutines)
+  io_context ctx;
+  bool connected = false;
+};
+          </code></pre>
+        </section>
+
+        <section>
+          <h2><a href="https://github.com/jamespascoe/accu2022-example-code/blob/master/co_chat/co_chat.cpp">Sender Coroutine</a></h2>
+          <pre class="stretch"><code class="c++" data-trim data-line-numbers="|3-21|24-39|25-33|35-36|38|">
+awaitable&ltvoid&gt sender(tcp::endpoint remote) {
+
+  for (;;) {
+    tcp::socket remote_sock(ctx);
+
+    auto [error] = co_await remote_sock.async_connect(
+        remote, as_tuple(use_awaitable));
+    if (!error) {
+      std::cout &lt&lt "Connected to: " &lt&lt remote &lt&lt std::endl;
+      connected = true;
+    } else {
+      std::cout &lt&lt "Could not connect to: " &lt&lt remote
+                &lt&lt " - retrying in 1s " &lt&lt std::endl;
+
+      steady_timer timer(
+          co_await boost::asio::this_coro::executor);
+      timer.expires_after(std::chrono::seconds(1));
+      co_await timer.async_wait(use_awaitable);
+
+      continue;
+    }
+
+    std::string data;
+    while (connected) {
+      // Read a string from stdin (non-blocking)
+      struct pollfd input[1] = {{.fd = 0, .events = POLLIN}};
+      if (poll(input, 1, 100 /* timeout in ms */)) {
+        char c;
+        while (std::cin.get(c) && c != '\n')
+          data += c;
+
+        data += "\r\n";
+      }
+
+      co_await async_write(remote_sock, buffer(data),
+                           as_tuple(use_awaitable));
+
+      data.clear();
+    }
+  }
+}
+          </code></pre>
+        </section>
+
+        <section>
+          <h2><a href="https://github.com/jamespascoe/accu2022-example-code/blob/master/co_chat/co_chat.cpp">Receiver Coroutine</a></h2>
+          <pre class="stretch"><code class="c++" data-trim data-line-numbers="|6-7|10-25|">
+awaitable&ltvoid&gt receiver(tcp::endpoint listen) {
+
+  tcp::acceptor acceptor(ctx, listen);
+
+  for (;;) {
+    auto [error, client] =
+        co_await acceptor.async_accept(as_tuple(use_awaitable));
+
+    if (!error) {
+      std::string data;
+
+      for (;;) {
+        auto [error, len] = co_await async_read_until(
+            client, dynamic_buffer(data), boost::regex("\r\n"),
+            as_tuple(use_awaitable));
+
+        if (error == boost::asio::error::eof) {
+          // remote has disconnected
+          connected = false;
+          break;
+        }
+
+        std::cout &lt&lt client.remote_endpoint() &lt&lt "&gt " &lt&lt data;
+        data.clear();
+      }
+    } else {
+      std::cerr &lt&lt "Accept failed: " &lt&lt error.message() &lt&lt "\n";
+    }
+  }
+}
+          </code></pre>
+        </section>
+
+        <section>
+          <h2><a href="https://github.com/jamespascoe/accu2022-example-code/blob/master/co_chat/co_chat.cpp">Complete Listing</a></h2>
+          <pre class="stretch"><code class="c++" data-trim data-line-numbers="">
+#include &ltboost/asio.hpp&gt
+#include &ltboost/asio/experimental/as_tuple.hpp&gt
+#include &ltboost/regex.hpp&gt
+
+#include &ltiostream&gt
+
+using boost::asio::awaitable;
+using boost::asio::buffer;
+using boost::asio::co_spawn;
+using boost::asio::detached;
+using boost::asio::dynamic_buffer;
+using boost::asio::io_context;
+using boost::asio::steady_timer;
+using boost::asio::use_awaitable;
+using boost::asio::experimental::as_tuple;
+using boost::asio::ip::basic_resolver_entry;
+using boost::asio::ip::tcp;
+using boost::asio::ip::tcp::resolver::passive;
+
+using boost::system::error_code;
+
+class chat {
+
+public:
+  chat(char *addr, char *port, char *remote_addr,
+       char *remote_port) {
+
+    tcp::resolver resolver(ctx);
+    basic_resolver_entry&lttcp&gt listen_endpoint;
+    basic_resolver_entry&lttcp&gt remote_endpoint;
+
+    listen_endpoint = *resolver.resolve(addr, port, passive);
+    remote_endpoint = *resolver.resolve(remote_addr, remote_port);
+
+    co_spawn(ctx, sender(remote_endpoint), detached);
+    co_spawn(ctx, receiver(listen_endpoint), detached);
+
+    ctx.run();
+  }
+
+private:
+  awaitable&ltvoid&gt sender(tcp::endpoint remote) {
+
+    for (;;) {
+      tcp::socket remote_sock(ctx);
+
+      auto [error] = co_await remote_sock.async_connect(
+          remote, as_tuple(use_awaitable));
+      if (!error) {
+        std::cout &lt&lt "Connected to: " &lt&lt remote &lt&lt std::endl;
+        connected = true;
+      } else {
+        std::cout &lt&lt "Could not connect to: " &lt&lt remote
+                  &lt&lt " - retrying in 1s " &lt&lt std::endl;
+
+        steady_timer timer(
+            co_await boost::asio::this_coro::executor);
+        timer.expires_after(std::chrono::seconds(1));
+        co_await timer.async_wait(use_awaitable);
+        continue;
+      }
+
+      std::string data;
+      while (connected) {
+        // Read a string from stdin (non-blocking)
+        struct pollfd input[1] = {{.fd = 0, .events = POLLIN}};
+        if (poll(input, 1, 100 /* timeout in ms */)) {
+          char c;
+          while (std::cin.get(c) && c != '\n')
+            data += c;
+
+          data += "\r\n";
+        }
+
+        co_await async_write(remote_sock, buffer(data),
+                             as_tuple(use_awaitable));
+
+        data.clear();
+      }
+    }
+  }
+
+  awaitable&ltvoid&gt receiver(tcp::endpoint listen) {
+
+    tcp::acceptor acceptor(ctx, listen);
+
+    for (;;) {
+      auto [error, client] =
+          co_await acceptor.async_accept(as_tuple(use_awaitable));
+
+      if (!error) {
+        std::string data;
+
+        for (;;) {
+          auto [error, len] = co_await async_read_until(
+              client, dynamic_buffer(data), boost::regex("\r\n"),
+              as_tuple(use_awaitable));
+
+          if (error == boost::asio::error::eof) {
+            // remote has disconnected
+            connected = false;
+            break;
+          }
+
+          std::cout &lt&lt client.remote_endpoint() &lt&lt "&gt " &lt&lt data;
+          data.clear();
+        }
+      } else {
+        std::cerr &lt&lt "Accept failed: " &lt&lt error.message() &lt&lt "\n";
+      }
+    }
+  }
+
+  // Member variables (shared between coroutines)
+  io_context ctx;
+  bool connected = false;
+};
+
+int main(int argc, char *argv[]) {
+
+  try {
+    if (argc != 5) {
+      std::cerr &lt&lt "Usage: " &lt&lt argv[0];
+      std::cerr &lt&lt " &ltlisten_address&gt &ltlisten_port&gt";
+      std::cerr &lt&lt " &ltremote_address&gt &ltremote_port&gt\n";
+      return 1;
+    }
+
+    chat(argv[1], argv[2], argv[3], argv[4]);
+
+  } catch (std::exception &e) {
+    std::cerr &lt&lt "Exception: " &lt&lt e.what() &lt&lt "\n";
+  }
+}
+          </code></pre>
+        </section>
 
 
 
 
+<!--
 
+  TODO:
 
+  Build instructions / screen captures (2-3)
+  Conclusions (1)
+  Update Introduction
 
+  Enrichment:
+
+  Update Generator Example
+  Diagrams? (2 - LucidChart)
+  What's coming in C++23? (1-2)
+
+-->
 
       </section>
       <section>
@@ -743,48 +1046,9 @@ int main() {
         </section>
 
         <section>
-          <h2>Performance Advice</h2>
-            <ul>
-              <span class="fragment" style="color:yellow"><li>Sol3 is fast but you can go faster</li></span>
-              <ul>
-                <span class="fragment"><li>lots of good advice <a href="https://sol2.readthedocs.io/en/latest/performance.html">here</a></li></span>
-              </ul>
-              <span class="fragment" style="color:yellow"><li>MCM spends a lot of time in the SWIG wrapper</li></span>
-              <ul>
-                <span class="fragment"><li>prefer lightweight typemaps</li></span>
-              </ul>
-              <span class="fragment" style="color:yellow"><li>The partition between C++ and Lua is important</li></span>
-              <ul>
-                <span class="fragment"><li>as is the concurrency design</li></span>
-              </ul>
-              <span class="fragment" style="color:yellow"><li>How the code interacts with Lua is significant</li></span>
-              <ul>
-                <span class="fragment"><li>prefer pre-compiled long-lived behaviours</li></span>
-              </ul>
-            </ul>
-        </section>
-
-        <section>
           <h2>Conclusion</h2>
             <ul>
               <span class="fragment" style="color:yellow"><li>The combination of C++ and Lua is powerful</li></span>
-              <ul>
-                <span class="fragment"><li>Actions (C++) and Behaviours (Lua)</li></span>
-              </ul>
-              <span class="fragment" style="color:yellow"><li>Sol3 binds Modern C++ to Lua</li></span>
-              <ul>
-                <span class="fragment"><li>simple-to-use, fast, ideal for Modern C++</li></span>
-                <span class="fragment"><li>by definition is a C++ to Lua binding</li></span>
-              </ul>
-              <span class="fragment" style="color:yellow"><li>SWIG allows us to map C++ types to/from Lua</li></span>
-              <ul>
-                <span class="fragment"><li>generates bindings in many languages</li></span>
-                <span class="fragment"><li>be mindful of performance</li></span>
-              </ul>
-              <span class="fragment" style="color:yellow"><li><a href="https://www.lua.org/versions.html#5.4">Lua 5.4.2</a> is now available</li></span>
-              <ul>
-                <span class="fragment"><li><a href="https://foicica.com/lua/">Lua Quick Reference</a> (updated for Lua 5.4)</li></span>
-              </ul>
             </ul>
         </section>
 
@@ -795,7 +1059,7 @@ int main() {
           <a href="mailto:james@james-pascoe.com">james@james-pascoe.com</a><p>
 
           <a href="http://jamespascoe.github.io/accu2022">http://jamespascoe.github.io/accu2022</a><br>
-          <a href="https://github.com/jamespascoe/accu2022-example-code.git">https://github.com/jamespascoe/accu2022-example-code.git</a>
+          <a href="https://github.com/jamespascoe/accu2022-example-code.git"><font size="6">https://github.com/jamespascoe/accu2022-example-code.git</font></a>
         </section>
 
         </section>
@@ -827,7 +1091,7 @@ int main() {
         keyboard: {
           67: () => { /* Keycode for the letter 'c' i.e. 'controls' */
             var currentSlide = Reveal.getCurrentSlide();
-            var currentVideo = currentSlide.slideBackgroundElement.getElementsByTagName('video')[0];
+            var currentVideo = currentSlide.getElementsByTagName('video')[0];
             if (currentVideo) {
               /* Toggle video controls on/off */
               currentVideo.controls = !currentVideo.controls
@@ -835,7 +1099,7 @@ int main() {
           },
           32: () => { /* Keycode for spacebar */
             var currentSlide = Reveal.getCurrentSlide();
-            var currentVideo = currentSlide.slideBackgroundElement.getElementsByTagName('video')[0];
+            var currentVideo = currentSlide.getElementsByTagName('video')[0];
             if (currentVideo) {
               /* Pause/resume video when the spacebar is pressed */
               if (currentVideo.paused == true) currentVideo.play();
