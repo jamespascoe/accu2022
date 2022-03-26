@@ -110,10 +110,6 @@
             <pre class="stretch"><code class="c++" style="width:102%" data-trim data-line-numbers="|21|23|25-40|">
 //
 // echo_server_blocking.cpp
-// ------------------------
-//
-// g++-11 -I/usr/local/boost_1_78_0/include -Wall -Werror
-// echo_server_blocking.cpp -o blocking -l pthread
 //
 
 #include &ltboost/asio.hpp&gt
@@ -160,10 +156,6 @@ int main() {
             <pre class="stretch"><code class="c++" style="width:102%" data-trim data-line-numbers="|89-105|96-98|101|72-87|47-70|31-45|">
 //
 // echo_server_async.cpp
-// ---------------------
-//
-// g++-11 -I/usr/local/boost_1_78_0/include -fcoroutines -std=c++20
-// -Wall -Werror echo_server_async.cpp -o async -l pthread
 //
 
 #include &ltboost/asio.hpp&gt
@@ -271,10 +263,6 @@ int main() {
             <pre class="stretch"><code class="c++" style="width:102%" data-trim data-line-numbers="|43-57|50-51|53|22-41|27|30-31|35-36|">
 //
 // echo_server_coroutine.cpp
-// -------------------------
-//
-// g++-11 -I/usr/local/boost_1_78_0/include -fcoroutines -std=c++20
-// -Wall -Werror echo_server_coroutine.cpp -o coroutine -l pthread
 //
 
 #include &ltboost/asio.hpp&gt
@@ -389,7 +377,7 @@ int main() {
           <h2>Tutorial Overview</h2>
             <ul>
               <span class="fragment"><li>Goal: implement a 'chat' program using coroutines</li></span>
-              <span class="fragment"><li>Prototype in <a href="https://www.lua.org/pil/9.1.html">Lua 5.4.4</a></li></span>
+              <span class="fragment"><li>Prototype in <a href="https://www.lua.org/pil/9.1.html">Lua 5.4.4</a></span><span class="fragment"> (and then in C++)</span></li></span>
               <span class="fragment"><li><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/n4775.pdf">C++20</a> coroutines:</li></span>
               <ul>
                 <span class="fragment">
@@ -422,7 +410,7 @@ int main() {
             <ul>
               <span class="fragment"><li>Sender coroutine: sends user input to peer</li></span>
               <span class="fragment"><li>Receiver coroutine: prints received messages</li></span>
-              <span class="fragment"><li>Dispatcher coroutine: schedules sender and receiver</li></span>
+              <span class="fragment"><li>Dispatcher: schedules sender and receiver</li></span>
               <span class="fragment"><li>main: processes arguments and creates coroutines</li></span>
             </ul>
         </section>
@@ -568,7 +556,7 @@ dispatcher(coroutines)
         <section>
 
         <section data-background-video="media/BWT_Intermission.mp4" data-background-video-loop=true>
-          <h1>Supporting Types</h1>
+          <h1>Coroutine Types</h1>
         </section>
 
         <section>
@@ -651,8 +639,6 @@ co_await async_write(..., use_awaitable);
 //
 // card_dealer.cpp
 // ---------------
-//
-// g++-11 -fcoroutines -Wall -Werror card_dealer.cpp -o dealer
 //
 
 #include &ltcoroutine&gt
@@ -1026,7 +1012,8 @@ int main(int argc, char *argv[]) {
 
   TODO:
 
-  Build instructions / screen captures (2-3)
+  Build instructions / screen captures (2)
+    - Lua + TCP echo server
   Conclusions (1)
   Update Introduction
 
