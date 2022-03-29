@@ -69,6 +69,19 @@
           </ul>
         </section>
 
+        <section>
+          <h2><a href="https://github.com/jamespascoe/accu2022-example-code.git">Example Code: Tools & Build</a></h2>
+            <ul>
+              <span class="fragment"><li>C++ examples all compile with <a href="https://gcc.gnu.org/gcc-11/changes.html">GCC 11.2</a>:</li></span>
+              <span class="fragment"><ul><li><a href="https://www.boost.org/doc/libs/1_78_0/doc/html/boost_asio.html">Boost Asio 1.78.0</a> (also works with 1.76.0)</li></ul></span>
+              <span class="fragment"><li>Lua examples run with <a href="https://www.lua.org/download.html">Lua 5.4.4</a>:</li></span>
+              <span class="fragment"><ul><li>Requires <code>luaposix</code> and <code>luasocket</code></li></ul></span>
+              <span class="fragment"><ul><li><code>sudo luarocks install luaposix</code></li></ul></span>
+              <span class="fragment"><ul><li><code>sudo luarocks install luasocket</code></li></ul></span>
+              <span class="fragment"><li>Tested on Linux Mint 19 and Mac OS X (<font size="6">Big Sur</font>, <font size="6">Mojave</font>)</li></span>
+            </ul>
+        </section>
+
       <section>
         <section data-background-video="media/BWT_Intermission.mp4" data-background-video-loop=true>
           <h1>Fundamentals</h1>
@@ -357,7 +370,7 @@ int main() {
             </ul>
         </section>
 
-        <section>
+        <section id="key-references">
           <h2>Key References</h2>
             <ul>
               <span class="fragment"><li><a href="https://lewissbaker.github.io/">Lewis Baker:</a></li></span>
@@ -1010,18 +1023,12 @@ int main(int argc, char *argv[]) {
 
   TODO:
 
-  Build instructions / Lua screen capture
-  Conclusions (1)
-  Update Introduction
+  Replace build lines?
 
   Enrichment:
 
   Update Generator Example
   Diagrams? (2 - LucidChart)
-
-  What's coming in C++23? (1-2)
-    - More library support P2168
-    - std::task -> std::lazy (analgous to cppcoro task)
 
 -->
 
@@ -1033,9 +1040,27 @@ int main(int argc, char *argv[]) {
         </section>
 
         <section>
+          <h2>What's Coming in C++23?</h2>
+            <ul>
+              <span class="fragment"><li>New Coroutine Types (plus <a href="http://wg21.link/p1745">other</a> improvements)</li></span>
+              <span class="fragment"><li><a href="http://wg21.link/p1056"><code>std::lazy<T></code></a>: lazily evaluated task</li></span>
+              <span class="fragment"><ul><li>Evolution of <a href="https://github.com/lewissbaker/cppcoro#taskt"><code>cppcoro::task<T></code></a></li></ul></span>
+              <span class="fragment"><li><a href="http://wg21.link/p2168"><code>std::generator<T></code></a>: synchronous generator</li></span>
+              <span class="fragment"><ul><li>supports ranges and recursion</li></ul></span>
+              <span class="fragment"><ul><li>(i.e. yield a generator of the same type)</li></ul></span>
+            </ul>
+        </section>
+
+        <section>
           <h2>Conclusion</h2>
             <ul>
-              <span class="fragment" style="color:yellow"><li>The combination of C++ and Lua is powerful</li></span>
+              <span class="fragment"><li>C++20 coroutines provide a language capability</li></span>
+              <span class="fragment"><ul><li>Functions can be suspended and later resumed</li></ul></span>
+              <span class="fragment"><li>Coroutines allow asynchronous code to be written</li></span>
+              <span class="fragment"><ul><li>With the readability of synchronous code</li></ul></span>
+              <span class="fragment"><li>Using coroutines in user-code can seem difficult</li></span>
+              <span class="fragment"><ul><li>Library support is improving</li></ul></span>
+              <span class="fragment"><ul><li>Persevere with <a href="#/key-references">key references</a></li></ul></span>
             </ul>
         </section>
 
