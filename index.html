@@ -112,14 +112,14 @@
           </ul>
         </section>
 
-        <section data-menu-title="Echo Server Capture">
+        <section data-menu-title="Echo Server Capture" data-state="increasePlaybackSpeed">
           <h2><a href="https://github.com/jamespascoe/accu2022-example-code/blob/master/echo_server">Echo Server Build & Run</a></h2>
           <video data-autoplay src="media/echo-server-terminal-capture-1080.mov"></video>
         </section>
 
         <section>
           <h2><a href="http://www.lua.org/manual/5.4/manual.html#4">Blocking Echo Server</a></h2>
-            <pre class="stretch"><code class="c++" style="width:102%" data-trim data-line-numbers="|21|23|25-40|">
+            <pre class="stretch"><code class="c++" style="width:102%" data-trim data-line-numbers="|17|19|21-36|">
 //
 // echo_server_blocking.cpp
 //
@@ -165,13 +165,12 @@ int main() {
 
         <section>
           <h2><a href="http://www.lua.org/manual/5.4/manual.html#4">Asynchronous Echo Server</a></h2>
-            <pre class="stretch"><code class="c++" style="width:102%" data-trim data-line-numbers="|89-105|96-98|101|72-87|47-70|31-45|">
+            <pre class="stretch"><code class="c++" style="width:102%" data-trim data-line-numbers="|84-100|91-93|96|67-82|42-65|48-52|53-64|26-40|">
 //
 // echo_server_async.cpp
 //
 
 #include &ltboost/asio.hpp&gt
-
 #include &ltiostream&gt
 
 using boost::asio::buffer;
@@ -272,7 +271,7 @@ int main() {
 
         <section>
           <h2><a href="http://www.lua.org/manual/5.4/manual.html#4">Coroutine Echo Server</a></h2>
-            <pre class="stretch"><code class="c++" style="width:102%" data-trim data-line-numbers="|43-57|50-51|53|22-41|27|30-31|35-36|">
+            <pre class="stretch"><code class="c++" style="width:102%" data-trim data-line-numbers="|39-53|46-47|49|18-37|23|26-27|31-32|">
 //
 // echo_server_coroutine.cpp
 //
@@ -364,7 +363,7 @@ int main() {
                     <li>(first in <a href="https://www.boost.org/doc/libs/1_67_0/doc/html/boost_asio/overview/core/coroutines_ts.html">1.67.0</a>, 'C++20 Support' in <a href="https://www.boost.org/doc/libs/1_77_0/doc/html/boost_asio/overview/core/cpp20_coroutines.html">1.77.0</a>)</li>
                   </ul>
                 </span>
-                <span class="fragment"><li>Lewis Baker's <a href="https://github.com/lewissbaker/cppcoro">cppcoro</a></li></span>
+                <span class="fragment"><li>Lewis Baker's <a href="https://github.com/lewissbaker/cppcoro">cppcoro</a>:</li></span>
               </ul>
               <span class="fragment"><li><span style="color:yellow">References to 'promise' and 'future' are not <code>std::promise</code> and <code>std::future</code>!</span></li></span>
             </ul>
@@ -373,12 +372,12 @@ int main() {
         <section id="key-references">
           <h2>Key References</h2>
             <ul>
-              <span class="fragment"><li><a href="https://lewissbaker.github.io/">Lewis Baker:</a></li></span>
+              <span class="fragment"><li><a href="https://lewissbaker.github.io/">Lewis Baker's</a> blog posts:</li></span>
               <span class="fragment"><ul><li><a href="https://lewissbaker.github.io/2017/09/25/coroutine-theory">Coroutine Theory</a></li></ul></span>
               <span class="fragment"><ul><li><a href="https://lewissbaker.github.io/2017/11/17/understanding-operator-co-await">Understanding operator co_await</a></li></ul></span>
               <span class="fragment"><ul><li><a href="https://lewissbaker.github.io/2018/09/05/understanding-the-promise-type">Understanding the promise type</a></li></ul></span>
               <span class="fragment"><ul><li><a href="https://lewissbaker.github.io/2020/05/11/understanding_symmetric_transfer">Understanding Symmetric Transfer</a></li></ul></span>
-              <span class="fragment"><li><a href="https://www.scs.stanford.edu/~dm">Dave Mazière:</a></li></span>
+              <span class="fragment"><li><a href="https://www.scs.stanford.edu/~dm">Dave Mazière's</a> blog post:</li></span>
               <span class="fragment"><ul><li><a href="https://www.scs.stanford.edu/~dm/blog/c++-coroutines.html">My tutorial and take on C++20 coroutines</a></li></ul></span>
               <span class="fragment"><li><a href="https://wg21.link/n4775">Gor Nishanov:</a></li></span>
               <span class="fragment"><ul><li><a href="https://wg21.link/n4775">C++ Extensions for Coroutines (N4775)</a></li></ul></span>
@@ -400,6 +399,7 @@ int main() {
                   </li>
                 </span>
                 <span class="fragment"><li>Return objects, promises, awaitables and traits</li></span>
+                <span class="fragment"><li>Generators</li></span>
               </ul>
               <span class="fragment"><li>Implement 'chat' in C++ (using <a href="https://www.boost.org/doc/libs/1_78_0/doc/html/boost_asio.html">Boost Asio 1.78</a>)</li></span>
             </ul>
@@ -427,14 +427,14 @@ int main() {
             </ul>
         </section>
 
-        <section>
+        <section data-state="increasePlaybackSpeed">
           <h2><a href="https://github.com/jamespascoe/accu2022-example-code/blob/master/echo_server">LuaChat Screen Capture</a></h2>
           <video data-autoplay src="media/luachat-terminal-capture-1080.mov"></video>
         </section>
 
         <section>
             <h2>Sender Coroutine</h2>
-            <pre class="stretch"><code class="lua" data-trim data-line-numbers="">
+            <pre class="stretch"><code class="lua" data-trim data-line-numbers="|4|6-11|13|15-28|">
 -- Connect to the peer and send messages read from stdin
 function sender (host, port)
 
@@ -470,7 +470,7 @@ end
 
         <section>
             <h2>Receiver Coroutine</h2>
-            <pre class="stretch"><code class="lua" data-trim data-line-numbers="">
+            <pre class="stretch"><code class="lua" data-trim data-line-numbers="|4-5|7|9-14|16-32|">
 -- Receive messages from our peer and print them
 function receiver (port)
 
@@ -511,7 +511,7 @@ end
 
           <section>
             <h2><a href="https://www.lua.org/pil/9.4.html">Dispatcher</a></h2>
-            <pre class="stretch"><code class="lua" style="width:102%" data-trim data-line-numbers="">
+            <pre class="stretch"><code class="lua" style="width:102%" data-trim data-line-numbers="|6-19|7|9-18|">
 function dispatcher (coroutines)
 
   while true do
@@ -538,7 +538,7 @@ end
 
           <section>
             <h2>Main Code</h2>
-            <pre class="stretch"><code class="lua" style="width:102%" data-trim data-line-numbers="">
+            <pre class="stretch"><code class="lua" style="width:102%" data-trim data-line-numbers="|12-18|20-21|">
 local port, remote_ip, remote_port = tonumber(arg[1]),
                                      arg[2],
                                      tonumber(arg[3])
@@ -592,7 +592,6 @@ co_await async_write(..., use_awaitable);
             <span class="fragment"><li><code><a href="https://lewissbaker.github.io/2017/11/17/understanding-operator-co-await">await_suspend</a></code>: schedule resume</li></span>
             <span class="fragment"><li><code><a href="https://lewissbaker.github.io/2017/11/17/understanding-operator-co-await">await_resume</a></code>: <code>co_await</code> return result</li><p></span>
             <span class="fragment"><li>Can be the same as the <a href="https://lewissbaker.github.io/2017/11/17/understanding-operator-co-await">awaitable type</a></li></span>
-            <span class="fragment"><li>... though not neccesarily</li></span>
           </ul>
         </section>
 
@@ -603,8 +602,8 @@ co_await async_write(..., use_awaitable);
             <span class="fragment"><ul><li>... using <code>coroutine_traits</code></li></ul></span>
             <span class="fragment"><li>E.g. '<code>task&ltT&gt</code>' or '<code>generator&ltT&gt</code>'</li></span>
             <span class="fragment"><li><a href="https://github.com/lewissbaker/cppcoro">CppCoro</a> defines several return types</li></span>
-            <span class="fragment"><li>Sometimes referred to as a 'future'</li></span>
-            <span class="fragment"><ul><li>Not to be confused with <code>std::future</code></li></ul></span>
+            <span class="fragment"><li>Referred to as a 'future' in some <a href="http://wg21.link/">WG21</a> papers</li></span>
+            <span class="fragment"><li>Not to be confused with <code>std::future</code></li></span>
           </ul>
         </section>
 
@@ -633,20 +632,20 @@ co_await async_write(..., use_awaitable);
         </section>
 
         <section>
-          <h2><a href=""><code>coroutine_handle</code></a></h2>
+          <h2><a href="https://en.cppreference.com/w/cpp/coroutine/coroutine_handle">Coroutine Handles</a></h2>
           <ul>
-            <span class="fragment"><li>Points to a coroutine frame on the heap</li></span>
+            <span class="fragment"><li>Point to coroutine frames on the heap</li></span>
             <span class="fragment"><ul><li>can be allocated on the stack</li></ul></span>
             <span class="fragment"><li>Coroutine frames contain volatile state</li></span>
             <span class="fragment"><ul><li>the address to resume at, local variables etc.</li></ul></span>
-            <span class="fragment"><li>Non-owning - has to be explicitly destroyed</li></span>
-            <span class="fragment"><ul><li>... typically through RAII</li></ul></span>
+            <span class="fragment"><li>Non-owning - have to be destroyed explicitly</li></span>
+            <span class="fragment"><ul><li>... often through RAII</li></ul></span>
           </ul>
         </section>
 
         <section>
           <h2><a href="https://github.com/jamespascoe/accu2022-example-code/tree/master/generator">Generator Example</a></h2>
-          <pre class="stretch"><code class="c++" data-trim data-line-numbers="|77-82|61-75|74|61|62-71|74|15|16-17|19-40|22-24|26-27|29-32|36-39|42-58|">
+          <pre class="stretch"><code class="c++" data-trim data-line-numbers="|75-80|59-73|59|60-69|71-72|13|14-15|17-38|20-22|24-25|27-30|34-37|40-56|">
 //
 // card_dealer.cpp
 // ---------------
@@ -730,6 +729,17 @@ int main() {
         </code></pre>
       </section>
 
+      <section>
+        <h2>Packet Generator</h2>
+        <ul>
+          <span class="fragment"><li>A networking example would be a packet generator</li></span>
+          <span class="fragment"><li>Coroutine generates packet</li></span>
+          <span class="fragment"><ul><li>Sequence number, checksums, encryption</li></ul></span>
+          <span class="fragment"><li>One coroutine transmits with <code>co_await</code></li></span>
+          <span class="fragment"><li>A second coroutine builds the next packet during latency window</li></ul></span>
+        </ul>
+      </section>
+
       </section>
       <section>
 
@@ -750,7 +760,7 @@ int main() {
           </ul>
         </section>
 
-        <section data-menu-title="Chat Screen Capture">
+        <section data-menu-title="Chat Screen Capture" data-state="increasePlaybackSpeed">
           <h2><a href="https://github.com/jamespascoe/accu2022-example-code/blob/master/co_chat/co_chat.cpp">Build & Run</a></h2>
           <video data-autoplay src="media/co_chat-terminal-capture-1080.mov"></video>
         </section>
@@ -765,8 +775,8 @@ public:
        char *remote_port) {
 
     tcp::resolver resolver(ctx);
-    basic_resolver_entry<tcp> listen_endpoint;
-    basic_resolver_entry<tcp> remote_endpoint;
+    basic_resolver_entry&lttcp&gt listen_endpoint;
+    basic_resolver_entry&lttcp&gt remote_endpoint;
 
     listen_endpoint = *resolver.resolve(addr, port, passive);
     remote_endpoint = *resolver.resolve(remote_addr, remote_port);
@@ -778,11 +788,11 @@ public:
   }
 
 private:
-  awaitable<void> sender(tcp::endpoint remote) {
+  awaitable&ltvoid&gt sender(tcp::endpoint remote) {
     // ...
   }
 
-  awaitable<void> receiver(tcp::endpoint listen) {
+  awaitable&ltvoid&gt receiver(tcp::endpoint listen) {
     // ,,,
   }
 
@@ -1016,22 +1026,6 @@ int main(int argc, char *argv[]) {
           </code></pre>
         </section>
 
-
-
-
-<!--
-
-  TODO:
-
-  Replace build lines?
-
-  Enrichment:
-
-  Update Generator Example
-  Diagrams? (2 - LucidChart)
-
--->
-
       </section>
       <section>
 
@@ -1055,7 +1049,7 @@ int main(int argc, char *argv[]) {
           <h2>Conclusion</h2>
             <ul>
               <span class="fragment"><li>C++20 coroutines provide a language capability</li></span>
-              <span class="fragment"><ul><li>Functions can be suspended and later resumed</li></ul></span>
+              <span class="fragment"><ul><li>Functions can be suspended and resumed</li></ul></span>
               <span class="fragment"><li>Coroutines allow asynchronous code to be written</li></span>
               <span class="fragment"><ul><li>With the readability of synchronous code</li></ul></span>
               <span class="fragment"><li>Using coroutines in user-code can seem difficult</li></span>
@@ -1085,7 +1079,6 @@ int main(int argc, char *argv[]) {
     <script src="plugin/menu/menu.js"></script>
     <script src="plugin/chart/Chart.min.js"></script>
     <script src="plugin/chart/plugin.js"></script>
-    <script src="plugin/animated/revealjs-animated.js"></script>
     <script>
       // More info about initialization & config:
       // - https://revealjs.com/initialization/
@@ -1172,6 +1165,14 @@ int main(int argc, char *argv[]) {
           if (!menu.isMenuInitialised()) {
             menu.initialiseMenu();
           }
+        }
+      }, false );
+
+      Reveal.addEventListener('increasePlaybackSpeed', function() {
+        var currentSlide = Reveal.getCurrentSlide();
+        var currentVideo = currentSlide.getElementsByTagName('video')[0];
+        if (currentVideo) {
+          currentVideo.playbackRate = 2.0;
         }
       }, false );
    </script>
