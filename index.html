@@ -78,7 +78,7 @@
               <span class="fragment"><ul><li>Requires <code>luaposix</code> and <code>luasocket</code></li></ul></span>
               <span class="fragment"><ul><li><code>sudo luarocks install luaposix</code></li></ul></span>
               <span class="fragment"><ul><li><code>sudo luarocks install luasocket</code></li></ul></span>
-              <span class="fragment"><li>Tested on Linux Mint 19 and Mac OS X (<font size="6">Big Sur</font>, <font size="6">Mojave</font>)</li></span>
+              <span class="fragment"><li>Tested on Linux Mint 19 and Mac OS X (<font size="6">Mojave</font>, <font size="6">Big Sur</font>)</li></span>
             </ul>
         </section>
 
@@ -97,6 +97,12 @@
             <span class="fragment"><li>Can suspend execution (returns to the caller)</li></span>
             <span class="fragment"><li>Can resume execution (at a later time)</li></span>
           </ul>
+          <aside class="notes">
+          When I am thinking about coroutines, I quite like the term subroutine because a subroutine can be either a function or a coroutine.
+          So, the key benefit of a coroutine is its suspension / resumption semantics. A function is called from a caller and then returns.
+          A coroutine is initially called from a caller, but can suspend its execution (at which point control is returned to the caller) and
+          then 'later' is resumed (typically after an asynchronous event or the completion of some computation).
+          </aside>
         </section>
 
         <section>
@@ -161,6 +167,9 @@ int main() {
   }
 }
           </code></pre>
+          <aside class="notes">
+          The io_context contains state required to run the event loop based on select, epoll, or other platform-specific calls.
+          </aside>
         </section>
 
         <section>
@@ -326,6 +335,11 @@ int main() {
   }
 }
           </code></pre>
+          <aside class="notes">
+          co_spawn is an Asio function that 'spawns a new coroutine-based thread of execution'. As I understand it, co_spawn
+          doesn't actually create a thread but uses threads that are part of the io_context pool. Also, this ('detached')
+          is a completion token and it says that there is no completion handler waiting for the operation's result.
+          </aside>
         </section>
 
       </section>
@@ -350,6 +364,21 @@ int main() {
                 <span class="fragment"><li><a href="https://en.cppreference.com/w/cpp/coroutine/suspend_never"><code>std::suspend_never</code></a></li></span>
               </ul>
             </ul>
+          <aside class="notes">
+          What do we actually get in C++20? Three new keywords and for me, really the star-of-the-show is co_await because
+          co_await suspends execution of a coroutine and returns control to the caller. co_yield, yields a value from a coroutine and
+          then suspends. So if you think of a generator, co_yield produces a value and then suspends for the next iteration. co_return
+          goes one step further by completing execution of the coroutine (and returns a value).
+          <p>
+          coroutine_handles are pointers to coroutine state and are used to resume and destroy coroutines. coroutine state is a fairly deep concept.
+          Often allocated on the heap (although some compilers will elide it to the caller's stack) and contains the coroutine's promise, parameters, as
+          well as its volatile state, so values of local variables, resumption point etc. Basically anything that is needed to resume that coroutine
+          at a later point. And that resumption may take place on some other thread.
+          <p>
+          coroutine_traits gives you the promise type from a coroutine's return type and its parameters. And then we have two trivial awaitables
+          called suspend_always and suspend_never and these are useful in a number of places, typically for controlling whether we want a coroutine
+          to begin lazily or eagerly.
+          </aside>
         </section>
 
         <section>
@@ -363,10 +392,18 @@ int main() {
                     <li>(first in <a href="https://www.boost.org/doc/libs/1_67_0/doc/html/boost_asio/overview/core/coroutines_ts.html">1.67.0</a>, 'C++20 Support' in <a href="https://www.boost.org/doc/libs/1_77_0/doc/html/boost_asio/overview/core/cpp20_coroutines.html">1.77.0</a>)</li>
                   </ul>
                 </span>
-                <span class="fragment"><li>Lewis Baker's <a href="https://github.com/lewissbaker/cppcoro">cppcoro</a>:</li></span>
+                <span class="fragment"><li>Lewis Baker's <a href="https://github.com/lewissbaker/cppcoro">CppCoro</a>:</li></span>
+                  <ul>
+                    <li>Contains coroutine types, awaitables etc.</li>
+                  </ul>
               </ul>
               <span class="fragment"><li><span style="color:yellow">References to 'promise' and 'future' are not <code>std::promise</code> and <code>std::future</code>!</span></li></span>
             </ul>
+          <aside class="notes">
+          This last point is a good one as well - in terms of the coroutine literature, you'll find references to 'promises' and 'futures'. Now these have nothing to do with std::promise
+          and std::future, moreover, these terms are being used in the classical Computer Science sense i.e. circa 1975. So a future is the user-side component of an asynchronous operation
+          and the promise is the executor's half.
+          </aside>
         </section>
 
         <section id="key-references">
@@ -415,6 +452,12 @@ int main() {
             <span class="fragment"><li><a href="https://www.lua.org/pil/9.1.html">Lua coroutines</a> are stackful</li></span>
             <span class="fragment"><li><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/n4775.pdf">C++20 coroutines</a> are stackless</li></span>
           </ul>
+          <aside class="notes">
+          Broadly speaking, stackful coroutines mean that each coroutine has its own stack. Sometimes, stackful coroutines
+          are called fibers and are used in Lua to provide pseudo-concurrency model similar to cooperative multi-threading.
+          By contrast, C++20 coroutines are stackless - they suspend execution by returning to the caller and the data that
+          is required to resume execution is stored in a callable on the heap (so separately from the stack).
+          </aside>
         </section>
 
         <section>
@@ -590,7 +633,7 @@ co_await async_write(..., use_awaitable);
             <span class="fragment"><li>Defines suspend and resume behaviour</li></span>
             <span class="fragment"><li><code><a href="https://lewissbaker.github.io/2017/11/17/understanding-operator-co-await">await_ready</a></code>: is suspend required?</li></span>
             <span class="fragment"><li><code><a href="https://lewissbaker.github.io/2017/11/17/understanding-operator-co-await">await_suspend</a></code>: schedule resume</li></span>
-            <span class="fragment"><li><code><a href="https://lewissbaker.github.io/2017/11/17/understanding-operator-co-await">await_resume</a></code>: <code>co_await</code> return result</li><p></span>
+            <span class="fragment"><li><code><a href="https://lewissbaker.github.io/2017/11/17/understanding-operator-co-await">await_resume</a></code>: <code>co_await</code> return result</li></span>
             <span class="fragment"><li>Can be the same as the <a href="https://lewissbaker.github.io/2017/11/17/understanding-operator-co-await">awaitable type</a></li></span>
           </ul>
         </section>
@@ -627,14 +670,14 @@ co_await async_write(..., use_awaitable);
             <span class="fragment"><ul><li>Disables <code>co_await</code> on certain types</li></ul></span>
             <span class="fragment"><ul><li>Modify the behaviour of awaitable values</li></ul></span>
             <span class="fragment"><li>Also possible to customise <code>co_yield</code></li></span>
-            <span class="fragment"><li>See Lewis Baker's Excellent <a href="https://lewissbaker.github.io/2018/09/05/understanding-the-promise-type">Blog Post</a> for details</li></span>
+            <span class="fragment"><li>See Lewis Baker's excellent <a href="https://lewissbaker.github.io/2018/09/05/understanding-the-promise-type">Blog Post</a> for details</li></span>
           </ul>
         </section>
 
         <section>
           <h2><a href="https://en.cppreference.com/w/cpp/coroutine/coroutine_handle">Coroutine Handles</a></h2>
           <ul>
-            <span class="fragment"><li>Point to coroutine frames on the heap</li></span>
+            <span class="fragment"><li>Point to coroutine frame (state) on the heap</li></span>
             <span class="fragment"><ul><li>can be allocated on the stack</li></ul></span>
             <span class="fragment"><li>Coroutine frames contain volatile state</li></span>
             <span class="fragment"><ul><li>the address to resume at, local variables etc.</li></ul></span>
@@ -730,13 +773,14 @@ int main() {
       </section>
 
       <section>
-        <h2>Packet Generator</h2>
+        <h2>Traffic Generator</h2>
         <ul>
-          <span class="fragment"><li>A networking example would be a packet generator</li></span>
-          <span class="fragment"><li>Coroutine generates packet</li></span>
+          <span class="fragment"><li>A networking example would be a traffic generator</li></span>
+          <span class="fragment"><li>Coroutine generates packets</li></span>
           <span class="fragment"><ul><li>Sequence number, checksums, encryption</li></ul></span>
           <span class="fragment"><li>One coroutine transmits with <code>co_await</code></li></span>
-          <span class="fragment"><li>A second coroutine builds the next packet during latency window</li></ul></span>
+          <span class="fragment"><li>A second coroutine builds the next packet</li></span>
+          <span class="fragment"><ul><li>... during the latency window</li></ul></span>
         </ul>
       </section>
 
