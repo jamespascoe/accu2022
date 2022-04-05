@@ -94,7 +94,7 @@
           <ul>
             <span class="fragment"><li>Invoked by a caller </span>
             <span class="fragment">(and return to a caller) ...</li></span>
-            <span class="fragment"><li>Can suspend execution (returns to the caller)</li></span>
+            <span class="fragment"><li>Can suspend execution</li></span>
             <span class="fragment"><li>Can resume execution (at a later time)</li></span>
           </ul>
           <aside class="notes">
@@ -339,6 +339,16 @@ int main() {
           co_spawn is an Asio function that 'spawns a new coroutine-based thread of execution'. As I understand it, co_spawn
           doesn't actually create a thread but uses threads that are part of the io_context pool. Also, this ('detached')
           is a completion token and it says that there is no completion handler waiting for the operation's result.
+          <p>
+          So lets look at what happens when we call co_await. Basically, three things happen: all of the local variables
+          get saved to a heap allocated coroutine frame. Secondly, a callable is created which when invoked will resume execution
+          of the coroutine at the point following the co_await expression. This callable is of type std::coroutine_handle. Thirdly,
+          execution jumps into a method (of the awaiter) of the co_await expression. And its this method (await_suspend) which
+          schedules resumption of the coroutine. And then the coroutine is suspended at this point and control returns to the
+          executor (co_spawn).
+          <p>
+          At this point, the executor is waiting for events. In this example, there is only one coroutine on this strand, otherwise
+          we could exploit this latency window to do useful work.
           </aside>
         </section>
 
@@ -393,9 +403,7 @@ int main() {
                   </ul>
                 </span>
                 <span class="fragment"><li>Lewis Baker's <a href="https://github.com/lewissbaker/cppcoro">CppCoro</a>:</li></span>
-                  <ul>
-                    <li>Contains coroutine types, awaitables etc.</li>
-                  </ul>
+                  <span class="fragment"><ul><li>Contains coroutine types, awaitables etc.</li></ul></span>
               </ul>
               <span class="fragment"><li><span style="color:yellow">References to 'promise' and 'future' are not <code>std::promise</code> and <code>std::future</code>!</span></li></span>
             </ul>
@@ -425,7 +433,7 @@ int main() {
           <h2>Tutorial Overview</h2>
             <ul>
               <span class="fragment"><li>Goal: implement a 'chat' program using coroutines</li></span>
-              <span class="fragment"><li>Prototype in <a href="https://www.lua.org/pil/9.1.html">Lua 5.4.4</a></span><span class="fragment"> (and then in C++)</span></li></span>
+              <span class="fragment"><li>Prototype in <a href="https://www.lua.org/pil/9.1.html">Lua 5.4.4</a></span><span class="fragment"> (and then write it in C++)</span></li></span>
               <span class="fragment"><li><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/n4775.pdf">C++20</a> coroutines:</li></span>
               <ul>
                 <span class="fragment">
@@ -448,7 +456,7 @@ int main() {
             <span class="fragment"><li>Lightweight embeddable scripting language</li></span>
             <span class="fragment"><li>Good way of building a mental model of coroutines</li></span>
             <span class="fragment"><li>Single threaded so lock-free, no races etc.</li></span>
-            <span class="fragment"><li>Implement your own dispatcher in Lua</li></span>
+            <span class="fragment"><li>Implement your own dispatcher (executor) in Lua</li></span>
             <span class="fragment"><li><a href="https://www.lua.org/pil/9.1.html">Lua coroutines</a> are stackful</li></span>
             <span class="fragment"><li><a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/n4775.pdf">C++20 coroutines</a> are stackless</li></span>
           </ul>
@@ -625,6 +633,18 @@ dispatcher(coroutines)
 co_await async_write(..., use_awaitable);
           </span></code></pre>
 
+          <aside class="notes">
+          [after bullets 1-4]
+
+          Ok, so why the distinction? I.e. why do we have the concept of an Awaitable type and an Awaiter?
+          So, an awaitable type is a type that supports co_await. But, whether or not co_await can be applied
+          directly to a type depends on the context in which the co_await expression appears. The promise type
+          can alter the semantics of the co_await expression through an 'await_transform' method and I've got a slide
+          coming up on that shortly.
+
+          By contrast the awaiter type allows the user to specify the coroutine's behaviour at specific points in
+          the suspension and resumption process. Lets take a look at the awaiter.
+          </aside>
         </section>
 
         <section>
@@ -636,13 +656,22 @@ co_await async_write(..., use_awaitable);
             <span class="fragment"><li><code><a href="https://lewissbaker.github.io/2017/11/17/understanding-operator-co-await">await_resume</a></code>: <code>co_await</code> return result</li></span>
             <span class="fragment"><li>Can be the same as the <a href="https://lewissbaker.github.io/2017/11/17/understanding-operator-co-await">awaitable type</a></li></span>
           </ul>
+          <aside class="notes">
+          The await_ready method allows you to avoid the cost of suspending if you know that the operation is going to complete synchronously.
+          <p>
+          By contrast, the key purpose of the await_suspend method is to schedule the coroutine for resumption. In particular, once the await
+          suspend method is called, the coroutine is suspended, so you are free to pass the coroutine handle to an executor so that the coroutine
+          can be resumed later.
+          <p>
+          And then when the coroutine is resumed, the await_resume method is called to obtain the result of the operation.
+          </aside>
         </section>
 
         <section>
           <h2>Coroutine Return Type</h2>
           <ul>
             <span class="fragment"><li>Declares the promise type to the compiler</li></span>
-            <span class="fragment"><ul><li>... using <code>coroutine_traits</code></li></ul></span>
+            <span class="fragment"><ul><li>Using <code>coroutine_traits</code></li></ul></span>
             <span class="fragment"><li>E.g. '<code>task&ltT&gt</code>' or '<code>generator&ltT&gt</code>'</li></span>
             <span class="fragment"><li><a href="https://github.com/lewissbaker/cppcoro">CppCoro</a> defines several return types</li></span>
             <span class="fragment"><li>Referred to as a 'future' in some <a href="http://wg21.link/">WG21</a> papers</li></span>
@@ -677,13 +706,15 @@ co_await async_write(..., use_awaitable);
         <section>
           <h2><a href="https://en.cppreference.com/w/cpp/coroutine/coroutine_handle">Coroutine Handles</a></h2>
           <ul>
-            <span class="fragment"><li>Point to coroutine frame (state) on the heap</li></span>
-            <span class="fragment"><ul><li>can be allocated on the stack</li></ul></span>
-            <span class="fragment"><li>Coroutine frames contain volatile state</li></span>
-            <span class="fragment"><ul><li>the address to resume at, local variables etc.</li></ul></span>
+            <span class="fragment"><li>Handle to a coroutine frame on the heap</li></span>
+            <span class="fragment"><li>Means through which coroutines are resumed</li></span>
+            <span class="fragment"><li>Also provide access to the promise type</li></span>
             <span class="fragment"><li>Non-owning - have to be destroyed explicitly</li></span>
-            <span class="fragment"><ul><li>... often through RAII</li></ul></span>
+            <span class="fragment"><ul><li>Often through RAII in the coroutine return type</li></ul></span>
           </ul>
+          <aside class="notes">
+            Bit like a C pointer
+          </aside>
         </section>
 
         <section>
