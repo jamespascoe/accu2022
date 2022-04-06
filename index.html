@@ -381,9 +381,9 @@ int main() {
           goes one step further by completing execution of the coroutine (and returns a value).
           <p>
           coroutine_handles are pointers to coroutine state and are used to resume and destroy coroutines. coroutine state is a fairly deep concept.
-          Often allocated on the heap (although some compilers will elide it to the caller's stack) and contains the coroutine's promise, parameters, as
-          well as its volatile state, so values of local variables, resumption point etc. Basically anything that is needed to resume that coroutine
-          at a later point. And that resumption may take place on some other thread.
+          Usually allocated on the heap (although I think there are some compilers will elide it to the caller's stack) and contains the coroutine's
+          promise, parameters, as well as its volatile state, so values of local variables, resumption point etc. Basically anything that is needed
+          to resume that coroutine at a later point. And that resumption may take place on some other thread.
           <p>
           coroutine_traits gives you the promise type from a coroutine's return type and its parameters. And then we have two trivial awaitables
           called suspend_always and suspend_never and these are useful in a number of places, typically for controlling whether we want a coroutine
@@ -618,7 +618,7 @@ dispatcher(coroutines)
         <section>
 
         <section data-background-video="media/BWT_Intermission.mp4" data-background-video-loop=true>
-          <h1>Coroutine Types</h1>
+          <h1>Coroutine Details</h1>
         </section>
 
         <section>
@@ -663,7 +663,8 @@ co_await async_write(..., use_awaitable);
           suspend method is called, the coroutine is suspended, so you are free to pass the coroutine handle to an executor so that the coroutine
           can be resumed later.
           <p>
-          And then when the coroutine is resumed, the await_resume method is called to obtain the result of the operation.
+          And then when the coroutine is resumed, the await_resume method is called to obtain the result of the operation and that is what is
+          returned in the coroutine.
           </aside>
         </section>
 
@@ -719,7 +720,7 @@ co_await async_write(..., use_awaitable);
 
         <section>
           <h2><a href="https://github.com/jamespascoe/accu2022-example-code/tree/master/generator">Generator Example</a></h2>
-          <pre class="stretch"><code class="c++" data-trim data-line-numbers="|75-80|59-73|59|60-69|71-72|13|14-15|17-38|20-22|24-25|27-30|34-37|40-56|">
+          <pre class="stretch"><code class="c++" data-trim data-line-numbers="|75-80|59-73|60-69|71-72|13|14-15|17-38|20-22|24-25|27-30|34-37|40-56|">
 //
 // card_dealer.cpp
 // ---------------
@@ -784,8 +785,8 @@ generator&ltstd::string&gt card_dealer(int deck_size) {
   std::uniform_int_distribution&ltint&gt suit(0, 3);
 
   std::array&ltstd::string, 13&gt cards = {
-      "Ace", "2", "3",  "4",    "5",     "6",   "7",
-      "8",   "9", "10", "Jack", "Queen", "King"};
+      "Ace", "2", "3", "4", "5", "6", "7",
+      "8", "9", "10", "Jack", "Queen", "King"};
 
   std::array&ltstd::string, 4&gt suits = {"Clubs", "Diamonds",
                                       "Spades", "Hearts"};
@@ -801,6 +802,23 @@ int main() {
     std::cout &lt&lt dealer.value() &lt&lt std::endl;
 }
         </code></pre>
+        <aside class="notes">
+        So, I thought we have a brief break from networking examples and here is a fun generator - i.e. a virtual card dealer.
+        <p>
+        The generator return type is entirely generic. So 'generator' may be defined in a library like CppCoro, whereas
+        'card_dealer' is a specific coroutine use case. And then the main code is the application.
+        <p>
+        When a coroutine starts executing, it does the following:
+        <ul>
+          <li>it allocates the coroutine frame using operator new</li>
+          <li>copies the corotuine's parameters to the frame</li>
+          <li>constructs the promise object</li>
+          <li>calls get_return_object and keeps the result in a local variable. This is what gets returned to the caller
+            when the coroutine first suspends.</li>
+          <li>calls initial_suspend in the promise type and co_awaits the result.</li>
+          <li>when that gets resumed, the body of the coroutine starts</li>
+        </ul>
+        </aside>
       </section>
 
       <section>
