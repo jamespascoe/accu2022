@@ -811,7 +811,7 @@ int main() {
         When a coroutine starts executing, it does the following:
         <ul>
           <li>it allocates the coroutine frame using operator new</li>
-          <li>copies the corotuine's parameters to the frame</li>
+          <li>copies the coroutine's parameters to the frame</li>
           <li>constructs the promise object</li>
           <li>calls get_return_object and keeps the result in a local variable. This is what gets returned to the caller
             when the coroutine first suspends.</li>
