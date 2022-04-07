@@ -65,7 +65,7 @@
               <span class="fragment"><li><a href="https://github.com/jamespascoe/CoChat.git">CoChat</a>: a coroutine based chat program</li></span>
               <span class="fragment"><li><a href="https://www.boost.org/doc/libs/1_78_0/doc/html/boost_asio/overview/core/cpp20_coroutines.html">Boost Asio (1.78)</a></li></span>
             </ul>
-            <span class="fragment"><li>C++23: the future of Coroutines</li></span>
+            <span class="fragment"><li>C++23/26: the future of Coroutines</li></span>
           </ul>
         </section>
 
@@ -1127,14 +1127,15 @@ int main(int argc, char *argv[]) {
         </section>
 
         <section>
-          <h2>What's Coming in C++23?</h2>
+          <h2>What's Coming in C++23/26?</h2>
             <ul>
-              <span class="fragment"><li>New Coroutine Types (plus <a href="http://wg21.link/p1745">other</a> improvements)</li></span>
-              <span class="fragment"><li><a href="http://wg21.link/p1056"><code>std::lazy<T></code></a>: lazily evaluated task</li></span>
-              <span class="fragment"><ul><li>Evolution of <a href="https://github.com/lewissbaker/cppcoro#taskt"><code>cppcoro::task<T></code></a></li></ul></span>
-              <span class="fragment"><li><a href="http://wg21.link/p2168"><code>std::generator<T></code></a>: synchronous generator</li></span>
-              <span class="fragment"><ul><li>supports ranges and recursion</li></ul></span>
-              <span class="fragment"><ul><li>(i.e. yield a generator of the same type)</li></ul></span>
+              <span class="fragment"><li>Library support for coroutines was <a href="http://wg21.link/p0592">planned</a></li></span>
+              <span class="fragment"><li><a href="http://wg21.link/p2502">P2502</a>: standardised generator <code>std::generator</code></li></span>
+              <span class="fragment"><ul><li>Models <code>std::ranges::input_range</code></li></ul></span>
+              <span class="fragment"><ul><li>Accepted by LEWG in Jan 2022 - sent to LWG</li></ul></span>
+              <span class="fragment"><ul><li>But, appears to have missed C++23</li></ul></span>
+              <span class="fragment"><li><a href="http://wg21.link/p2502">P2300</a>: standardised execution <code>std::execution</code></li></span>
+              <span class="fragment"><ul><li>Targeting C++26 (see also: <a href="https://github.com/facebookexperimental/libunifex">libunifex</a>)</li></ul></span>
             </ul>
         </section>
 
@@ -1145,7 +1146,7 @@ int main(int argc, char *argv[]) {
               <span class="fragment"><ul><li>Functions can be suspended and resumed</li></ul></span>
               <span class="fragment"><li>Coroutines allow asynchronous code to be written</li></span>
               <span class="fragment"><ul><li>With the readability of synchronous code</li></ul></span>
-              <span class="fragment"><li>Using coroutines in user-code can seem difficult</li></span>
+              <span class="fragment"><li>Using coroutines in user-code:</li></span>
               <span class="fragment"><ul><li>Library support is improving</li></ul></span>
               <span class="fragment"><ul><li>Persevere with <a href="#/key-references">key references</a></li></ul></span>
             </ul>
