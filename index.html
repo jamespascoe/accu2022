@@ -338,7 +338,9 @@ int main() {
           <aside class="notes">
           co_spawn is an Asio function that 'spawns a new coroutine-based thread of execution'. As I understand it, co_spawn
           doesn't actually create a thread but uses threads that are part of the io_context pool. Also, this ('detached')
-          is a completion token and it says that there is no completion handler waiting for the operation's result.
+          statement is a completion token and it says that there is no completion handler waiting for the operation's result.
+          <p>
+          The unary operator co_await suspends a coroutine and returns control to the caller, which in this case, is the Boost Asio executor (i.e. as a result of the call to co_spawn). In this example, there is only one coroutine on this executor, but in a more complex example, there would be multiple coroutines here and the system could do useful work.
           <p>
           So lets look at what happens when we call co_await. Basically, three things happen: all of the local variables
           get saved to a heap allocated coroutine frame. Secondly, a callable is created which when invoked will resume execution
@@ -346,9 +348,6 @@ int main() {
           execution jumps into a method (of the awaiter) of the co_await expression. And its this method (await_suspend) which
           schedules resumption of the coroutine. And then the coroutine is suspended at this point and control returns to the
           executor (co_spawn).
-          <p>
-          At this point, the executor is waiting for events. In this example, there is only one coroutine on this strand, otherwise
-          we could exploit this latency window to do useful work.
           </aside>
         </section>
 
@@ -886,7 +885,7 @@ private:
   }
 
   awaitable&ltvoid&gt receiver(tcp::endpoint listen) {
-    // ,,,
+    // ...
   }
 
   // Member variables (shared between coroutines)
